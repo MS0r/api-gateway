@@ -10,8 +10,9 @@ class Unit(DateTimeMixin, IDMixin, Base):
     description = Column(String, nullable=False)
     course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
 
-    course = relationship("Course", back_populates="unit")
+    course = relationship("Course", back_populates="units")
     exercise = relationship("Exercise",uselist=False, back_populates="unit")
     subunits = relationship("Subunit", back_populates="unit", cascade="all, delete-orphan")
+    deliveries = relationship("Delivery", back_populates="unit", cascade="all, delete-orphan")
 
     order = Column(Integer, nullable=True)

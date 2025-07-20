@@ -12,7 +12,9 @@ class AppEnvTypes(Enum):
 class BaseAppSettings(BaseSettings):
     app_env: AppEnvTypes = AppEnvTypes.prod
     
-    class Config:
-        env_file = ".env"
+
+    model_config = dict( 
+        env_file = ".env",
         extra = "ignore"
+    )
        

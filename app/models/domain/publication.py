@@ -14,12 +14,14 @@ class Question(Publication, Base):
     title = Column(String, nullable=False)
     tags = Column(ARRAY(String), nullable=True)
 
-    user = relationship("User", back_populates="question")
+    user = relationship("User", back_populates="questions")
     answers = relationship("Answer", back_populates="question", cascade="all, delete-orphan")
+    votes = relationship("Vote", back_populates="question", cascade="all, delete-orphan")
 
 class Answer(Publication, Base):
     __tablename__ = "answers"
     question_id = Column(Integer, ForeignKey("questions.id"), nullable=False)
 
-    user = relationship("User", back_populates="answer")
-    question = relationship("Question", back_populates="answer", cascade="all, delete-orphan")
+    user = relationship("User", back_populates="answers")
+    question = relationship("Question", back_populates="answers", cascade="all, delete-orphan")
+    votes = relationship("Vote", back_populates="answer", cascade="all, delete-orphan")

@@ -14,9 +14,9 @@ class Vote(DateTimeMixin, IDMixin, Base):
     question_id = Column(Integer, ForeignKey("questions.id"), nullable=True)
     answer_id = Column(Integer, ForeignKey("answers.id"), nullable=True)
 
-    user = relationship("User", back_populates="vote")
-    question = relationship("Question", back_populates="vote")
-    answer = relationship("Answer", back_populates="vote")
+    user = relationship("User", back_populates="votes")
+    question = relationship("Question", back_populates="votes")
+    answer = relationship("Answer", back_populates="votes")
 
     vote = Column(Enum(VoteType), nullable=False)
     

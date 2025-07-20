@@ -33,8 +33,9 @@ class AppSettings(BaseAppSettings):
     logging_level: int = logging.INFO
     loggers: Tuple[str, ...] = ("uvicorn.asgi", "uvicorn.access","sqlalchemy.engine.Engine")
 
-    class Config:
+    model_config = dict(
         validate_assignment = True
+    )
 
     @property
     def fastapi_kwargs(self) -> Dict[str, Any]:

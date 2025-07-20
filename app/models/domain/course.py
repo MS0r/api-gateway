@@ -24,7 +24,7 @@ class Enrollment(DateTimeMixin, IDMixin, Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
     
-    user = relationship("User", back_populates="enrollment")
-    course = relationship("Course", back_populates="enrollment")
+    user = relationship("User", back_populates="enrollments")
+    course = relationship("Course", back_populates="enrollments")
 
     status = Column(Enum(EnrollmentStatus), nullable=False)

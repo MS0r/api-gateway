@@ -3,7 +3,7 @@ from app.models.common import DateTimeMixin, IDMixin, Base
 from sqlalchemy import Column, String, Enum, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 
-class ExerciseStatus(enum.Enum):
+class DeliveryStatus(enum.Enum):
     PENDING = "pending"
     COMPLETED = "completed"
     FAILED = "failed"
@@ -11,7 +11,7 @@ class ExerciseStatus(enum.Enum):
 class Delivery(DateTimeMixin, IDMixin, Base):
     __tablename__ = "deliveries"
     delivery_date = Column(String, nullable=False)
-    result = Column(Enum(ExerciseStatus), nullable=False)
+    result = Column(Enum(DeliveryStatus), nullable=False)
     code_snippet = Column(String, nullable=True)
 
     exercise_id = Column(Integer, ForeignKey("exercises.id"), nullable=False)

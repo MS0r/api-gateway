@@ -1,10 +1,14 @@
-from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from loguru import logger
 from app.models.common import Base
+from typing import AsyncGenerator
+
 import app.models.domain
 
 from app.core.settings.app import AppSettings
+
 
 async def connect_to_db(app : FastAPI, settings: AppSettings) -> None:
     """Connect to the database."""
@@ -14,6 +18,7 @@ async def connect_to_db(app : FastAPI, settings: AppSettings) -> None:
         str(settings.database_url),
         echo=True
     )
+    app.state.async_session = async_sessionmaker(app.state.engine, expire_on_commit=False)
 
     logger.info("Database connection established.")
 
@@ -39,3 +44,12 @@ async def close_db_connection(app: FastAPI) -> None:
     await app.state.engine.dispose()
 
     logger.info("Database connection closed.")
+
+@asynccontextmanager
+async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
+    session : AsyncSession = app.state.async_session()
+    try:
+        yield session
+    finally:
+        await session.close()
+        logger.info("Database session closed.")
