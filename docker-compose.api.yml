@@ -1,0 +1,11 @@
+version: '3'
+services:
+  api-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: api-workspace
+    volumes:
+      - .:/workspace:cached
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    tty: true

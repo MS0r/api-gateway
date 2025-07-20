@@ -1,0 +1,1 @@
+# Module to initialize domain models for the application and the schemas used in web responses.
