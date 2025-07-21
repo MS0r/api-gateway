@@ -2,6 +2,7 @@ import enum
 from app.models.common import DateTimeMixin, IDMixin, Base
 from sqlalchemy import Column, String, Enum
 from sqlalchemy.orm import relationship
+import bcrypt
 
 class UserRole(enum.Enum):
     USER = "user"
@@ -27,3 +28,8 @@ class User(DateTimeMixin, IDMixin, Base):
     enrollments = relationship("Enrollment", back_populates="user", cascade="all, delete-orphan")
     quiz_answers = relationship("Quiz_Answers", back_populates="user", cascade="all, delete-orphan")
     deliveries = relationship("Delivery", back_populates="user", cascade="all, delete-orphan")
+
+    def verify_password(self, password: str) -> bool:
+        pwhash = bcrypt.hashpw(password, self.password)
+        return self.password == pwhash
+    

@@ -4,5 +4,5 @@ class RWModel(BaseModel):
     _id : int = Field(alias="id")
 
     model_config = dict(
-        orm_mode=True,
+        from_attributes=True,
     )

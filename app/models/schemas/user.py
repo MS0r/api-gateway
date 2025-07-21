@@ -25,9 +25,16 @@ class UserUpdate(BaseModel):
     role: UserRole | None = None
     status: UserStatus | None = None
 
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
 class UserRead(RWModel):
     id: int
     username: str
     email: str
     role: UserRole
     status: UserStatus
+
+class UserWithToken(UserRead):
+    token: str
