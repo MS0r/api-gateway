@@ -1,12 +1,7 @@
-from enum import Enum
 from pydantic import BaseModel
 from app.models.schemas.rwmodel import RWModel
 from typing_extensions import Self
-
-class EnrollmentStatus(Enum):
-    ENROLLED = "enrolled"
-    COMPLETED = "completed"
-    DROPPED = "dropped"
+from app.models.domain.course import EnrollmentStatus
 
 class CourseCreate(BaseModel):
     title: str

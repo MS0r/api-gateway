@@ -27,7 +27,7 @@ class User(DateTimeMixin, IDMixin, Base):
     votes = relationship("Vote", back_populates="user", cascade="all, delete-orphan")
     enrollments = relationship("Enrollment", back_populates="user", cascade="all, delete-orphan")
     quiz_answers = relationship("Quiz_Answers", back_populates="user", cascade="all, delete-orphan")
-    deliveries = relationship("Delivery", back_populates="user", cascade="all, delete-orphan")
+    submissions = relationship("Submission", back_populates="user", cascade="all, delete-orphan")
 
     def verify_password(self, password: str) -> bool:
         pwhash = bcrypt.hashpw(password, self.password)

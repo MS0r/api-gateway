@@ -1,3 +1,5 @@
+from typing import List
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.domain.publication import Question, Answer
 from app.models.schemas.publication import (QuestionCreate, QuestionUpdate, QuestionRead, AnswerCreate, AnswerRead)
@@ -14,6 +16,12 @@ async def get_question(db: AsyncSession, question_id: int) -> QuestionRead | Non
     if question:
         return QuestionRead.model_validate(question)
     return None
+
+async def get_questions_from_user(db: AsyncSession, user_id: int) -> List[QuestionRead]:
+    questions = await db.execute(
+        select(Question).where(Question.user_id == user_id)
+    )
+    return [QuestionRead.model_validate(q) for q in questions.scalars().all()]
 
 async def update_question(db: AsyncSession, question_id: int, question_update: QuestionUpdate) -> QuestionRead | None:
     question = await db.get(Question, question_id)
@@ -37,6 +45,19 @@ async def get_answer(db: AsyncSession, answer_id: int) -> AnswerRead | None:
     if answer:
         return AnswerRead.model_validate(answer)
     return None
+
+async def get_answers_for_question(db: AsyncSession, question_id: int) -> List[AnswerRead]:
+    answers = await db.execute(
+        select(Answer).where(Answer.question_id == question_id)
+    )
+    return [AnswerRead.model_validate(a) for a in answers.scalars().all()]
+
+async def get_answers_from_user(db: AsyncSession, user_id: int) -> List[AnswerRead]:
+    answers = await db.execute(
+        select(Answer).where(Answer.user_id == user_id)
+    )
+    return [AnswerRead.model_validate(a) for a in answers.scalars().all()]
+
 
 async def update_answer(db: AsyncSession, answer_id: int, answer_update: AnswerCreate) -> AnswerRead | None:    
     answer = await db.get(Answer, answer_id)

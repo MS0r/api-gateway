@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Body, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.services import unit as unit_service
+from app.db.crud import unit as unit_service
 from app.models.schemas.unit import UnitCreate, UnitUpdate, UnitRead
 from app.db.events import get_db_session
 

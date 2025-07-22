@@ -1,3 +1,5 @@
+from typing import List
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.domain.quiz_answers import QuizAnswers
 from app.models.schemas.quiz_answers import (QuizAnswersCreate, QuizAnswersUpdate, QuizAnswersRead)
@@ -14,6 +16,12 @@ async def get_quiz_answers(db: AsyncSession, quiz_answers_id: int) -> QuizAnswer
     if quiz_answers:
         return QuizAnswersRead.model_validate(quiz_answers)
     return None
+
+async def get_quiz_answers_from_user_course(db: AsyncSession, user_id: int, course_id: int) -> List[QuizAnswersRead]:
+    quiz_answers = await db.execute(
+        select(QuizAnswers).where(QuizAnswers.user_id == user_id, QuizAnswers.course_id == course_id)
+    )
+    return [QuizAnswersRead.model_validate(q) for q in quiz_answers.scalars().all()]
 
 async def update_quiz_answers(db: AsyncSession, quiz_answers_id: int, quiz_answers_update: QuizAnswersUpdate) -> QuizAnswersRead | None:
     quiz_answers = await db.get(QuizAnswers, quiz_answers_id)

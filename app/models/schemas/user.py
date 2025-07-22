@@ -1,15 +1,6 @@
-from enum import Enum
 from pydantic import BaseModel
 from app.models.schemas.rwmodel import RWModel
-
-class UserRole(Enum):
-    USER : str = "user"
-    ADMIN : str = "admin"
-
-class UserStatus(Enum):
-    ACTIVE : str = "active"
-    INACTIVE : str = "inactive"
-    SUSPENDED : str = "suspended"
+from app.models.domain.user import (UserRole, UserStatus)
 
 class UserCreate(BaseModel):
     username: str
@@ -30,7 +21,7 @@ class UserLogin(BaseModel):
     password: str
 
 class UserRead(RWModel):
-    id: int
+    _id: int
     username: str
     email: str
     role: UserRole
@@ -38,3 +29,4 @@ class UserRead(RWModel):
 
 class UserWithToken(UserRead):
     token: str
+

@@ -12,4 +12,4 @@ class Exercise(DateTimeMixin, IDMixin, Base):
     unit_id = Column(Integer, ForeignKey("units.id"), nullable=False)
 
     unit = relationship("Unit", back_populates="exercise")
-    deliveries = relationship("Delivery", back_populates="exercise", cascade="all, delete-orphan")
+    submissions = relationship("Submission", back_populates="exercise", cascade="all, delete-orphan")
