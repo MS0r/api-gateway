@@ -10,7 +10,7 @@ class DevAppSettings(AppSettings):
 
     logging_level: int = logging.DEBUG
 
-    model_config = dict(
+    model_config = {
         **AppSettings.model_config,
-        env_file=".env"
-    )
+        "env_file": ".env"
+    }

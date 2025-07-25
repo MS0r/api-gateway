@@ -1,6 +1,10 @@
+from typing import List, Union
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+
 from app.models.domain.unit import Unit
-from app.models.schemas.unit import (UnitCreate, UnitUpdate, UnitRead)
+from app.models.domain.subunit import Subunit
+from app.models.schemas.unit import (UnitCreate, UnitUpdate)
 
 async def create_unit(db: AsyncSession, unit_create: UnitCreate) -> Unit:
     unit = Unit(**unit_create.model_dump(by_alias=True))
@@ -9,13 +13,11 @@ async def create_unit(db: AsyncSession, unit_create: UnitCreate) -> Unit:
     await db.refresh(unit)
     return unit
 
-async def get_unit(db: AsyncSession, unit_id: int) -> UnitRead | None:
+async def get_unit(db: AsyncSession, unit_id: int) -> Unit | None:
     unit = await db.get(Unit, unit_id)
-    if unit:
-        return UnitRead.model_validate(unit)
-    return None
+    return unit if unit else None
 
-async def update_unit(db: AsyncSession, unit_id: int, unit_update: UnitUpdate) -> UnitRead | None:
+async def update_unit(db: AsyncSession, unit_id: int, unit_update: UnitUpdate) -> Unit | None:
     unit = await db.get(Unit, unit_id)
     if not unit:
         return None
@@ -23,4 +25,10 @@ async def update_unit(db: AsyncSession, unit_id: int, unit_update: UnitUpdate) -
         setattr(unit, key, value)
     await db.commit()
     await db.refresh(unit)
-    return UnitRead.model_validate(unit)
+    return unit
+
+async def get_subunits_by_unit_id(db: AsyncSession, unit_id: int) -> List[Subunit | None]:
+    subunits = await db.execute(
+        select(Subunit).where(Subunit.unit_id == unit_id)
+    )
+    return [subunit for subunit in subunits.scalars().all()]

@@ -14,7 +14,6 @@ class QuestionUpdate(BaseModel):
     tags: List[str] | None = None
 
 class QuestionRead(RWModel):
-    _id: int
     title: str
     body: str
     tags: List[str] | None
@@ -28,7 +27,6 @@ class AnswerUpdate(BaseModel):
     body: str | None = None
     
 class AnswerRead(RWModel):
-    _id: int
     body: str
     question_id: int
     user_id: int

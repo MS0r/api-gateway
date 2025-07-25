@@ -12,17 +12,16 @@ class CourseUpdate(BaseModel):
     description: str | None = None
 
 class CourseRead(RWModel):
-    _id: int
     title: str
     description: str
     units: list[Self] | None = None
 
-class CourseEnrollment(BaseModel):
+class EnrollmentCreate(BaseModel):
     user_id: int
     course_id: int
     status: EnrollmentStatus = EnrollmentStatus.ENROLLED
 
-class CourseEnrollmentRead(RWModel):
+class EnrollmentRead(RWModel):
     user_id: int
     course_id: int
     status: EnrollmentStatus

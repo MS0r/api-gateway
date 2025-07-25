@@ -21,7 +21,6 @@ class VoteUpdate(BaseModel):
     vote: VoteType | None = None
 
 class VoteRead(RWModel):
-    _id: int
     user_id: int
     question_id: int | None = None
     answer_id: int | None = None

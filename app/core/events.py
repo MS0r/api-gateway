@@ -25,8 +25,6 @@ def create_stop_app_handler(
     @logger.catch
     async def stop_app() -> None:
         logger.info(settings.app_env)
-        if settings.app_env == AppEnvTypes.dev:
-            await delete_tables(app)
         await close_db_connection(app)
 
     return stop_app

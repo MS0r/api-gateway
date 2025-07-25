@@ -21,7 +21,6 @@ class UserLogin(BaseModel):
     password: str
 
 class UserRead(RWModel):
-    _id: int
     username: str
     email: str
     role: UserRole

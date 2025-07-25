@@ -23,5 +23,5 @@ class Answer(Publication, Base):
     question_id = Column(Integer, ForeignKey("questions.id"), nullable=False)
 
     user = relationship("User", back_populates="answers")
-    question = relationship("Question", back_populates="answers", cascade="all, delete-orphan")
+    question = relationship("Question", back_populates="answers")
     votes = relationship("Vote", back_populates="answer", cascade="all, delete-orphan")

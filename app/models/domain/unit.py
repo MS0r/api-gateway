@@ -13,6 +13,5 @@ class Unit(DateTimeMixin, IDMixin, Base):
     course = relationship("Course", back_populates="units")
     exercise = relationship("Exercise",uselist=False, back_populates="unit")
     subunits = relationship("Subunit", back_populates="unit", cascade="all, delete-orphan")
-    submissions = relationship("Submission", back_populates="unit", cascade="all, delete-orphan")
 
     order = Column(Integer, nullable=True)

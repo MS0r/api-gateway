@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.domain.vote import Vote
-from app.models.schemas.vote import (VoteCreate, VoteRead, VoteUpdate)
+from app.models.schemas.vote import (VoteCreate, VoteUpdate)
 
 async def create_vote(db: AsyncSession, vote_create: VoteCreate) -> Vote:
     vote = Vote(**vote_create.model_dump(by_alias=True))
@@ -9,13 +9,13 @@ async def create_vote(db: AsyncSession, vote_create: VoteCreate) -> Vote:
     await db.refresh(vote)
     return vote
 
-async def get_vote(db: AsyncSession, vote_id: int) -> VoteRead | None:
+async def get_vote(db: AsyncSession, vote_id: int) -> Vote | None:
     vote = await db.get(Vote, vote_id)
     if vote:
-        return VoteRead.model_validate(vote)
+        return vote
     return None
 
-async def update_vote(db: AsyncSession, vote_id: int, vote_update: VoteUpdate) -> VoteRead | None:
+async def update_vote(db: AsyncSession, vote_id: int, vote_update: VoteUpdate) -> Vote | None:
     vote = await db.get(Vote, vote_id)
     if not vote:
         return None
@@ -23,4 +23,4 @@ async def update_vote(db: AsyncSession, vote_id: int, vote_update: VoteUpdate) -
         setattr(vote, key, value)
     await db.commit()
     await db.refresh(vote)
-    return VoteRead.model_validate(vote)
+    return vote

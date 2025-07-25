@@ -11,7 +11,7 @@ from app.core.settings.app import AppSettings
 from app.core.config import get_app_settings
 from app.services import jwt
 from app.db.crud import user as user_service
-from app.db.events import get_db_session
+from app.api.dependencies.database import get_db_session
 from app.db.errors import EntityDoesNotExist
 from app.models.domain.user import User
 
@@ -34,7 +34,7 @@ def get_current_user_authorize(*,required: bool = True) -> Callable:
     return _get_current_user if required else _get_current_user_optional
 
 def _get_authorization_header_retriever(
-        *, required: bool
+        *, required: bool = True
 ) -> Callable:
    return _get_authorization_header if required else _get_authorization_header_optional
 
