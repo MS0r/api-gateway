@@ -8,6 +8,9 @@ services:
       - .:/workspace:cached
     depends_on:
       - db
+      - sandbox
+    ports:
+      - "8080:8000"
     command: /bin/sh -c "while sleep 1000; do :; done"
     tty: true
   db:
@@ -23,5 +26,15 @@ services:
       POSTGRES_DB: mydb
     volumes:
       - pgdata:/var/lib/postgresql/data
+  sandbox:
+    build:
+      context: ./sandbox
+      dockerfile: Dockerfile.server
+    cpus: 0.5
+    mem_limit: 256m
+    pids_limit: 100
+    container_name: sandbox-server
+    ports:
+      - 4000:4000
 volumes:
   pgdata: {}

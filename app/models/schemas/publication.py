@@ -3,9 +3,12 @@ from app.models.schemas.rwmodel import RWModel
 from typing import List
 
 
-class QuestionCreate(BaseModel):
+class QuestionCreateNoID(BaseModel):
     title: str
+    body: str
     tags: List[str] | None = None
+
+class QuestionCreate(QuestionCreateNoID):
     user_id: int
 
 class QuestionUpdate(BaseModel):
@@ -22,6 +25,7 @@ class QuestionRead(RWModel):
 class AnswerCreate(BaseModel):
     body: str
     question_id: int
+    user_id: int
 
 class AnswerUpdate(BaseModel):
     body: str | None = None

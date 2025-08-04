@@ -32,3 +32,9 @@ async def update_submission(db: AsyncSession, submission_id: int, submission_upd
     await db.commit()
     await db.refresh(submission)
     return submission
+
+async def get_submissions_by_exercise_id(db: AsyncSession, exercise_id: int) -> List[Submission]:
+    submissions = await db.execute(
+        select(Submission).where(Submission.exercise_id == exercise_id)
+    )
+    return [submission for submission in submissions.scalars().all()]

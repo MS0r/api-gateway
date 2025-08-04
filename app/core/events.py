@@ -24,7 +24,6 @@ def create_stop_app_handler(
         settings : AppSettings) -> Callable:  # type: ignore
     @logger.catch
     async def stop_app() -> None:
-        logger.info(settings.app_env)
         await close_db_connection(app)
 
     return stop_app

@@ -24,7 +24,7 @@ class User(DateTimeMixin, IDMixin, Base):
 
     questions = relationship("Question", back_populates="user", cascade="all, delete-orphan")
     answers = relationship("Answer", back_populates="user", cascade="all, delete-orphan")
-    votes = relationship("Vote", back_populates="user", cascade="all, delete-orphan")
+    votes = relationship("Vote", back_populates="user", cascade="all")
     enrollments = relationship("Enrollment", back_populates="user", cascade="all, delete-orphan")
     quiz_passes = relationship("QuizPass", back_populates="user", cascade="all, delete-orphan")
     submissions = relationship("Submission", back_populates="user", cascade="all, delete-orphan")

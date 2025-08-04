@@ -5,7 +5,10 @@ RUN apt update &&\
     apt clean && rm -rf /var/lib/apt/lists/*
 
 COPY requirements*txt .
+
 RUN python -m pip install -U pip && \
     python -m pip install -r requirements.txt -r requirements.dev.txt
+
+EXPOSE 8000
 
 WORKDIR /workspace

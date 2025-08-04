@@ -9,9 +9,12 @@ from app.api.dependencies.database import get_db_session
 from app.core.config import get_app_settings
 from app.core.settings.app import AppSettings
 from app.models.domain.user import User
+
 from app.models.schemas.user import UserWithToken
 from app.models.schemas.progress import ProgressSchema
 from app.models.schemas.course import EnrollmentRead
+from app.models.schemas.submission import SubmissionRead
+
 from app.db.crud import course as course_crud
 from app.services import jwt
 from app.services import user as user_service
@@ -52,3 +55,12 @@ async def get_user_enrollments_route(
 ) -> List[EnrollmentRead]:
     enrollments = await course_crud.get_user_enrollments(db, user.id)
     return [EnrollmentRead.model_validate(enrollment) for enrollment in enrollments]
+
+@router.get("/submissions", response_model=List[SubmissionRead], name="submission:get_user_submissions")
+async def get_user_submissions_route(
+    user: User = Depends(get_current_user_authorize()),
+) -> List[SubmissionRead]:
+    if not user.submissions:
+        raise HTTPException(status_code=404, detail="No submissions found for this user")
+    # Convert domain model to schema model
+    return [SubmissionRead.model_validate(submission) for submission in user.submissions]

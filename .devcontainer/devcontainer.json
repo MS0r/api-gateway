@@ -27,7 +27,9 @@
 				"ms-python.python",
 				"ms-python.vscode-pylance",
 				"ms-toolsai.jupyter",
-				"tamasfe.even-better-toml"
+				"tamasfe.even-better-toml",
+				"jakebecker.elixir-ls",
+				"pgourlain.erlang"
 			]
 		}
 	},

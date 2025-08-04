@@ -6,6 +6,7 @@ class UnitCreate(BaseModel):
     title: str
     description: str
     order: int | None = None
+    course_id: int
 
 class UnitUpdate(BaseModel):
     title: str | None = None
