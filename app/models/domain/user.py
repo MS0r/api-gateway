@@ -18,7 +18,7 @@ class User(DateTimeMixin, IDMixin, Base):
     __tablename__ = "users"
     username = Column(String, nullable=False, unique=True)
     email = Column(String, nullable=False, unique=True)
-    password = Column(String, nullable=False)
+    _password = Column("password", String, nullable=False)
     role =  Column(Enum(UserRole), nullable=False)
     status =  Column(Enum(UserStatus), nullable=False)
 
@@ -29,7 +29,21 @@ class User(DateTimeMixin, IDMixin, Base):
     quiz_passes = relationship("QuizPass", back_populates="user", cascade="all, delete-orphan")
     submissions = relationship("Submission", back_populates="user", cascade="all, delete-orphan")
 
-    def verify_password(self, password: str) -> bool:
-        pwhash = bcrypt.hashpw(password, self.password)
-        return self.password == pwhash
+    def __init__(self, **kwargs):
+        raw_password = kwargs.pop("password", None)
+        super().__init__(**kwargs)
+        if raw_password:
+            self.password = raw_password
     
+    @property
+    def password(self) -> str:
+        raise AttributeError("Password is not accessible directly.")
+    
+    @password.setter
+    def password(self, raw_password: str) -> None:
+        hashed = bcrypt.hashpw(raw_password.encode('utf-8'), bcrypt.gensalt())
+        self._password = hashed.decode('utf-8')
+
+    def verify_password(self, password: str) -> bool:
+        return bcrypt.checkpw(password.encode('utf-8'), self._password.encode('utf-8'))
+

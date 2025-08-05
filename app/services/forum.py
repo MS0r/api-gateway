@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.crud import publication as publication_crud
 from app.models.domain.publication import Question, Answer
 from app.models.domain.vote import Vote, VoteType
-from app.models.schemas.publication import QuestionRead, QuestionCreateNoID, AnswerRead, Answer
+from app.models.schemas.publication import QuestionRead, QuestionCreateNoID, AnswerRead
 from app.models.schemas.vote import VoteCreate, VoteUpdate
 
 async def vote_publication(

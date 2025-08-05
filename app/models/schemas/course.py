@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from app.models.schemas.rwmodel import RWModel
-from typing_extensions import Self
 from app.models.domain.course import EnrollmentStatus
 
 class CourseCreate(BaseModel):
@@ -14,7 +13,6 @@ class CourseUpdate(BaseModel):
 class CourseRead(RWModel):
     title: str
     description: str
-    units: list[Self] | None = None
 
 class EnrollmentCreate(BaseModel):
     user_id: int

@@ -50,3 +50,9 @@ async def get_course_full(db: AsyncSession, course_id: int) -> Course:
         )
     )
     return result.scalar_one()
+
+async def get_course_units(db: AsyncSession, course_id: int) -> List[Unit]:
+    course = await get_course_full(db, course_id)
+    if not course:
+        return []
+    return course.units

@@ -27,12 +27,9 @@
 				"ms-python.python",
 				"ms-python.vscode-pylance",
 				"ms-toolsai.jupyter",
-				"tamasfe.even-better-toml",
-				"jakebecker.elixir-ls",
-				"pgourlain.erlang"
+				"tamasfe.even-better-toml"
 			]
 		}
 	},
-	"forwardPorts": [5432],
 	"remoteUser": "vscode"
 }

@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
 from app.models.schemas.user import UserCreate, UserLogin, UserWithToken
+from app.models.domain.user import User
 from app.api.dependencies.database import get_db_session
 from app.db.crud import user as user_crud
 from app.services.jwt import create_access_token_for_user
@@ -39,7 +40,7 @@ async def login_user_route(
     db: AsyncSession = Depends(get_db_session),
     settings: AppSettings = Depends(get_app_settings)
 ) -> UserWithToken:
-    user = await user_crud.get_user_by_username(db, user_login.username) | await user_crud.get_user_by_email(db, user_login.username)
+    user : User = await user_crud.get_user_by_username(db, user_login.username) | await user_crud.get_user_by_email(db, user_login.username)
 
     if not user or not user.verify_password(user_login.password):
         raise HTTPException(status_code=401, detail="Invalid username or password")

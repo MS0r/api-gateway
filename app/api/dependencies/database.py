@@ -10,7 +10,6 @@ def _get_db_session_maker(request: Request) -> Callable[[], AsyncSession]:
     """Create a session maker for the given engine."""
     return request.app.state.session_maker
 
-@asynccontextmanager
 async def get_db_session(
     session_maker : Callable[[], AsyncSession] = Depends(_get_db_session_maker)
 ) -> AsyncGenerator[AsyncSession, None]:

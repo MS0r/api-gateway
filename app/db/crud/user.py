@@ -7,14 +7,10 @@ from sqlalchemy.exc import IntegrityError
 from app.models.domain.user import User
 from app.models.schemas.user import (UserCreate, UserUpdate)
 from app.db.errors import EntityDoesNotExist
-import bcrypt
 
-def hash_password(password: str) -> bytes:
-    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
 async def create_user(db: AsyncSession, user_create: UserCreate) -> User:
     user_data = user_create.model_dump(by_alias=True)
-    user_data["password"] = hash_password(user_create.password)
     user = User(**user_data)
     try:
         db.add(user)

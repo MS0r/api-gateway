@@ -3,9 +3,11 @@ from fastapi import FastAPI
 from loguru import logger
 
 from app.models.common import Base
+from sqlalchemy import text
 import app.models.domain
 
 from app.core.settings.app import AppSettings
+from app.db import entries
 
 
 async def connect_to_db(app : FastAPI, settings: AppSettings) -> None:
@@ -34,6 +36,21 @@ async def delete_tables(app: FastAPI) -> None:
 
     logger.info("Database tables deleted.")
 
+async def delete_entries_from_db(app: FastAPI) -> None:
+    """Delete all entries from the database."""
+    async with app.state.session_maker() as session:
+        for table in reversed(Base.metadata.sorted_tables):
+            await session.execute(text(f'TRUNCATE TABLE "{table.name}" RESTART IDENTITY CASCADE;'))
+        await session.commit()
+    
+    logger.info("All entries from the database have been deleted.")
+
+async def create_initial_data(app: FastAPI) -> None:
+    """Create initial data in the database."""
+    async with app.state.session_maker() as session:
+        await entries.create_initial_data(session)
+
+    logger.info("Initial data created in the database.")
 
 async def close_db_connection(app: FastAPI) -> None:
     logger.info("Closing database connection.")

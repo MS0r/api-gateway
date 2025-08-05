@@ -7,7 +7,7 @@ class Subunit(DateTimeMixin, IDMixin, Base):
     __tablename__ = "subunits"
     title = Column(String, nullable=False)
     description = Column(String, nullable=False)
-    order = Column(String, nullable=True)
+    order = Column(Integer, nullable=True)
     content = Column(String, nullable=True)
 
     unit_id = Column(Integer, ForeignKey("units.id"), nullable=False)
