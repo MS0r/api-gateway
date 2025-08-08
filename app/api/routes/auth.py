@@ -2,7 +2,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
-from app.models.schemas.user import UserCreate, UserLogin, UserWithToken
+from app.models.schemas.user import UserCreate, UserLogin, UserWithToken, UserRead
 from app.models.domain.user import User
 from app.api.dependencies.database import get_db_session
 from app.db.crud import user as user_crud
@@ -26,13 +26,13 @@ async def create_user_route(
         token = create_access_token_for_user(user, secret_key=settings.secret_key.get_secret_value())
 
         return UserWithToken(
-            **user.model_dump(by_alias=True),
+            **UserRead.model_validate(user).model_dump(by_alias=True),
             token=token
         )
     
     except IntegrityError as e:
-        raise HTTPException(status_code=400, detail="Username or email already exists") from e
-    
+        raise HTTPException(status_code=409, detail="Username or email already exists") from e
+
 
 @router.post("/login", response_model=UserWithToken, name="user:login")
 async def login_user_route(
@@ -40,7 +40,8 @@ async def login_user_route(
     db: AsyncSession = Depends(get_db_session),
     settings: AppSettings = Depends(get_app_settings)
 ) -> UserWithToken:
-    user : User = await user_crud.get_user_by_username(db, user_login.username) | await user_crud.get_user_by_email(db, user_login.username)
+    if not (user := await user_crud.get_user_by_username(db, user_login.username)):
+        user = await user_crud.get_user_by_email(db, user_login.username)
 
     if not user or not user.verify_password(user_login.password):
         raise HTTPException(status_code=401, detail="Invalid username or password")
@@ -48,6 +49,6 @@ async def login_user_route(
     jwt = create_access_token_for_user(user, secret_key=settings.secret_key.get_secret_value())
 
     return UserWithToken(
-        **user.model_dump(by_alias=True),
+        **UserRead.model_validate(user).model_dump(by_alias=True),
         token=jwt
     )

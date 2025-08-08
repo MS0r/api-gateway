@@ -37,7 +37,7 @@ async def get_current_user(
         token=token
     )
 
-@router.get("/progress/{course_id}", response_model=ProgressSchema, name="course:course_progress")
+@router.get("/progress/{course_id}", response_model=ProgressSchema, name="user:course_progress")
 async def get_course_progress_route(
     course_id: int,
     db: AsyncSession = Depends(get_db_session),
@@ -48,7 +48,7 @@ async def get_course_progress_route(
         raise HTTPException(status_code=404, detail="No progress found for this course")
     return progress
 
-@router.get("/enrollments", response_model=List[EnrollmentRead], name="course:enrollments")
+@router.get("/enrollments", response_model=List[EnrollmentRead], name="user:enrollments")
 async def get_user_enrollments_route(
     user : User = Depends(get_current_user_authorize()),
     db: AsyncSession = Depends(get_db_session)
@@ -56,7 +56,7 @@ async def get_user_enrollments_route(
     enrollments = await course_crud.get_user_enrollments(db, user.id)
     return [EnrollmentRead.model_validate(enrollment) for enrollment in enrollments]
 
-@router.get("/submissions", response_model=List[SubmissionRead], name="submission:get_user_submissions")
+@router.get("/submissions", response_model=List[SubmissionRead], name="user:get_user_submissions")
 async def get_user_submissions_route(
     user: User = Depends(get_current_user_authorize()),
 ) -> List[SubmissionRead]:

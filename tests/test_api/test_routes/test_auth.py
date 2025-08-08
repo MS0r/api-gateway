@@ -1,7 +1,7 @@
 import pytest
 from fastapi import FastAPI
 from httpx import AsyncClient
-from starlette.status import HTTP_403_FORBIDDEN
+from starlette.status import HTTP_403_FORBIDDEN, HTTP_409_CONFLICT
 
 from app.models.domain.user import User
 from app.services.jwt import create_access_token_for_user
@@ -28,3 +28,14 @@ async def test_unable_to_login_when_user_does_not_exist_any_more(
         headers={"Authorization": f"{authorization_prefix} {token}"},
     )
     assert response.status_code == HTTP_403_FORBIDDEN
+
+@pytest.mark.asyncio
+async def test_register_user_when_it_exists(
+    app: FastAPI, client: AsyncClient, test_user: User
+) -> None:
+    response = await client.post(
+        app.url_path_for("user:register"),
+        json={"user" : {"username": test_user.username,"email" : test_user.email ,"password" : "password"}},
+    )
+
+    assert response.status_code == HTTP_409_CONFLICT

@@ -21,13 +21,13 @@ async def get_questions_from_user(db: AsyncSession, user_id: int) -> List[Questi
     questions = await db.execute(
         select(Question).where(Question.user_id == user_id)
     )
-    return [q for q in questions.scalars().all()]
+    return questions.scalars().all()
 
 async def get_last_questions(db: AsyncSession) -> List[Question]:
     questions = await db.execute(
         select(Question).order_by(Question.created_at.desc()).limit(5)
     )
-    return [q for q in questions.scalars().all()]
+    return questions.scalars().all()
 
 async def update_question(db: AsyncSession, question_id: int, question_update: QuestionUpdate) -> Question | None:
     question = await db.get(Question, question_id)
@@ -54,13 +54,13 @@ async def get_answers_for_question(db: AsyncSession, question_id: int) -> List[A
     answers = await db.execute(
         select(Answer).where(Answer.question_id == question_id)
     )
-    return [a for a in answers.scalars().all()]
+    return answers.scalars().all()
 
 async def get_answers_from_user(db: AsyncSession, user_id: int) -> List[Answer]:
     answers = await db.execute(
         select(Answer).where(Answer.user_id == user_id)
     )
-    return [a for a in answers.scalars().all()]
+    return answers.scalars().all()
 
 async def update_answer(db: AsyncSession, answer_id: int, answer_update: AnswerCreate) -> Answer | None:
     answer = await db.get(Answer, answer_id)

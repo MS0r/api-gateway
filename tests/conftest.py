@@ -13,6 +13,7 @@ from httpx import AsyncClient, ASGITransport
 from app.services import jwt
 
 from app.models.domain.user import User, UserRole, UserStatus
+from app.models.domain.publication import Question, Answer
 
 load_dotenv()
 
@@ -83,6 +84,19 @@ async def test_user(session: AsyncSession) -> User:
     await session.commit()
     await session.refresh(user)
     return user
+
+@pytest_asyncio.fixture
+async def test_question(session: AsyncSession, test_user: User) -> Question:
+    question = Question(
+            title="Test Question 1",
+            body="This is a test question.",
+            tags=["erlang"],
+            user_id=test_user.id
+    )
+    session.add(question)
+    await session.commit()
+    await session.refresh(question)
+    return question
 
 @pytest_asyncio.fixture
 async def token(test_user: User) -> str:

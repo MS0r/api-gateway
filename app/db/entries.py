@@ -84,42 +84,58 @@ async def create_initial_data(db : AsyncSession) -> None:
         title="Subunit 1",
         description="This is the first subunit of unit 1.",
         order=1,
-        content="Content of subunit 1",
+        blocks=[
+          { "type": "text", "value": "Welcome to Erlang tutorials." },
+          { "type": "code", "value": '''-module(hello).\n-export([start/0]).\nstart() -> io:format("Hello, World!~n").''' },
+          { "type": "text", "value": "This is the basic structure of a module." },
+        ],
         unit_id=unit1_id
     )
     subunit1_2 = SubunitCreate(
         title="Subunit 2",
         description="This is the second subunit of unit 1.",
         order=2,
-        content="Content of subunit 2",
+        blocks=[
+            {"type": "text", "value": "This is the second subunit of unit 1."},
+            {"type": "code", "value": '''-module(hello2).\n-export([start/0]).\nstart() -> io:format("Hello again!~n").'''}
+        ],
         unit_id=unit1_id
     )
     subunit2_1 = SubunitCreate(
         title="Subunit 1",
         description="This is the first subunit of unit 2.",
         order=1,
-        content="Content of subunit 1",
+        blocks=[
+            {"type": "text", "value": "Content of subunit 1"},
+        ],
         unit_id=unit2_id
     )
     subunit2_2 = SubunitCreate(
         title="Subunit 2",
         description="This is the second subunit of unit 2.",
         order=2,
-        content="Content of subunit 2",
+        blocks=[
+            {"type": "text", "value": "Content of subunit 2"},
+        ],
         unit_id=unit2_id
     )
     subunit3_1 = SubunitCreate(
         title="Subunit 1",
         description="This is the first subunit of unit 3.",
         order=1,
-        content="Content of subunit 1",
+        blocks=[
+            {"type": "text", "value": "Content of subunit 1"},
+        ],
         unit_id=unit3_id
     )
     subunit3_2 = SubunitCreate(
         title="Subunit 2",
         description="This is the second subunit of unit 3.",
         order=2,
-        content="Content of subunit 2",
+        blocks=[
+            {"type": "text", "value": "Content of subunit 2"},
+            {"type": "code", "value": '''-module(hello3).\n-export([start/0]).\nstart() -> io:format("Hello from subunit 3!~n").'''}
+        ],
         unit_id=unit3_id
     ) 
     subunit1_1_db = await subunit_crud.create_subunit(db, subunit1_1)

@@ -62,5 +62,5 @@ async def get_course_units_route(
     course = await course_crud.get_course_units(db, course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
-
+    
     return [UnitRead.model_validate(unit) for unit in course] if course else []
