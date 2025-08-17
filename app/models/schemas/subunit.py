@@ -1,10 +1,11 @@
-from enum import Enum
-from typing import List
-from pydantic import BaseModel
+from typing import List, Literal
+from pydantic import BaseModel, field_validator
+from app.models.schemas.quiz import QuizRead
+from app.models.domain.quiz import Quiz
 from app.models.schemas.rwmodel import RWModel
 
 class Block(BaseModel):
-    type: str
+    type: Literal['text','html','code']
     value: str
 
 class SubunitCreate(BaseModel):
@@ -26,4 +27,10 @@ class SubunitRead(RWModel):
     order: int | None = None
     blocks: List[Block]
     unit_id: int
+    quiz : QuizRead | None = None
 
+    @field_validator('quiz',mode='before')
+    def validate_quiz(cls, v : Quiz | None) -> QuizRead:
+        if v is None:
+            return None
+        return QuizRead.model_validate(v)

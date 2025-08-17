@@ -32,7 +32,7 @@ async def get_user_progress(user_id : int, course_id : int, db : AsyncSession) -
     else:
         exercise_progress = 0.0
 
-    progress = (quiz_progress + exercise_progress) / 2
+    progress = ((quiz_progress + exercise_progress) / 2) * 100
 
     return ProgressSchema(
         progress=progress,

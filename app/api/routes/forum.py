@@ -1,4 +1,5 @@
 from typing import List
+from unittest import result
 
 from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,7 +10,7 @@ from app.api.dependencies.database import get_db_session
 from app.models.domain.publication import Question, Answer
 from app.models.domain.vote import VoteType
 from app.models.domain.user import User
-from app.models.schemas.publication import QuestionCreate, QuestionRead, AnswerCreate, AnswerRead, QuestionCreateNoID
+from app.models.schemas.publication import QuestionCreate, QuestionRead, AnswerCreate, AnswerRead, QuestionCreateNoID, QuestionReadSingle
 from app.models.schemas.vote import VoteCreate
 
 from app.db.crud import publication as publication_crud
@@ -17,14 +18,25 @@ from app.services import forum as forum_service
 
 router = APIRouter()
 
-@router.get("/questions",response_model=List[QuestionRead], name="forum:get_questions")
-async def get_questions_route(
+@router.get("/questions",response_model=List[QuestionRead], name="forum:search_questions")
+async def search_questions_route(
+    s: str | None = None,
     db: AsyncSession = Depends(get_db_session)
 ) -> List[QuestionRead]:
-    questions = await publication_crud.get_last_questions(db)
-    return [] if len(questions) == 0 else [QuestionRead.model_validate(question) for question in questions]
+    if s:
+        questions = await publication_crud.search_questions(db, s)
+    else:
+        questions = await publication_crud.get_last_questions(db)
+    result = []
+    for question, a, u, d in questions:
+        q = QuestionRead.model_validate(question)
+        setattr(q, "answer_count", a)
+        setattr(q, "upvote_count", u)
+        setattr(q, "downvote_count", d)
+        result.append(q)
+    return result
 
-@router.post("", response_model=QuestionRead, name="forum:create_question")
+@router.post("/questions", response_model=QuestionRead, name="forum:create_question")
 async def create_question_route(
     question: QuestionCreateNoID = Body(..., embed=True),
     user: User = Depends(get_current_user_authorize()),
@@ -33,7 +45,35 @@ async def create_question_route(
     question = await publication_crud.create_question(db, QuestionCreate(**question.model_dump(), user_id=user.id))
     return QuestionRead.model_validate(question)
 
-@router.post("/{question_id}",response_model=AnswerCreate, name="forum:create_answer")
+@router.get("/questions/{question_id}", response_model=QuestionReadSingle, name="forum:get_question")
+async def get_question_route(
+    question_id: int,
+    db: AsyncSession = Depends(get_db_session)
+) -> QuestionReadSingle:
+    question = await publication_crud.get_question(db, question_id, False)
+    if not question:
+        raise HTTPException(status_code=404, detail="Question not found")
+    question, u, d = question
+    q = QuestionReadSingle.model_validate(question)
+    setattr(q, "upvote_count", u)
+    setattr(q, "downvote_count", d)
+    return q
+
+@router.get("/questions/view/{question_id}", response_model=QuestionReadSingle, name="forum:view_question")
+async def view_question_route(
+    question_id: int,
+    db: AsyncSession = Depends(get_db_session)
+) -> QuestionReadSingle:
+    question = await publication_crud.get_question(db, question_id,True)
+    if not question:
+        raise HTTPException(status_code=404, detail="Question not found")
+    question, u, d = question
+    q = QuestionReadSingle.model_validate(question)
+    setattr(q, "upvote_count", u)
+    setattr(q, "downvote_count", d)
+    return q
+
+@router.post("/questions/{question_id}",response_model=AnswerCreate, name="forum:create_answer")
 async def create_answer_route(
     question_id: int,
     body: str = Body(..., embed=True),

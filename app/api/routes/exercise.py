@@ -6,9 +6,12 @@ from app.api.dependencies.database import get_db_session
 from app.models.domain.user import User
 from app.models.schemas.exercise import ExerciseCreate, ExerciseRead
 from app.models.schemas.submission import SubmissionCreate, SubmissionRead, SubmissionCreateNoID
+from app.models.schemas.erlang import ErlangTestResponse
+
 
 from app.db.crud import exercise as exercise_crud
 from app.db.crud import submission as submission_crud
+from app.services import erlang as erlang_service
 
 router = APIRouter()
 
@@ -43,16 +46,23 @@ async def get_submissions_route(
         raise HTTPException(status_code=404, detail="No submissions found for this exercise")
     return [SubmissionRead.model_validate(submission) for submission in exercise.submissions]
 
-@router.post("/{exercise_id}/submit", response_model=SubmissionRead, name="exercise:submit_exercise")
+@router.post("/{exercise_id}/submit", response_model=ErlangTestResponse, name="exercise:submit_exercise")
 async def submit_exercise_route(
     exercise_id: int,
     submission: SubmissionCreateNoID = Body(..., embed=True),
     user: User = Depends(get_current_user_authorize()),
     db: AsyncSession = Depends(get_db_session)
-) -> SubmissionRead:
-    submission_created = await submission_crud.create_submission(
-        db, SubmissionCreate(**submission.model_dump(), user_id=user.id, exercise_id=exercise_id)
-    )
-    if not submission_created:
-        raise HTTPException(status_code=400, detail="Failed to submit exercise")
-    return SubmissionRead.model_validate(submission_created)
+) -> ErlangTestResponse:
+    try:
+        sub = SubmissionCreate(code_snippet=submission.code_snippet, user_id=user.id, exercise_id=exercise_id)
+        test_response = await erlang_service.submit_code_erlang(db, sub)
+        return test_response
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.delete("/submission/{submission_id}",response_model=bool, name="exercise:delete_submission")
+async def delete_submission_route(
+    submission_id: int,
+    db: AsyncSession = Depends(get_db_session)
+):
+    return await submission_crud.delete_submission(db, submission_id)

@@ -13,6 +13,7 @@ class Question(Publication, Base):
     __tablename__ = "questions"
     title = Column(String, nullable=False)
     tags = Column(ARRAY(String), nullable=True)
+    views = Column(Integer, default=0)
 
     user = relationship("User", back_populates="questions")
     answers = relationship("Answer", back_populates="question", cascade="all, delete-orphan")

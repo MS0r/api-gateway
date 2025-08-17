@@ -6,6 +6,8 @@ from sqlalchemy.orm import selectinload
 
 from app.models.domain.user import User
 from app.models.domain.unit import Unit
+from app.models.domain.subunit import Subunit
+from app.models.domain.quiz import Quiz, QuizQuestion
 from app.models.domain.course import Course, Enrollment
 from app.models.schemas.course import CourseCreate, CourseUpdate
 
@@ -46,7 +48,8 @@ async def get_course_full(db: AsyncSession, course_id: int) -> Course:
         select(Course)
         .where(Course.id == course_id)
         .options(
-            selectinload(Course.units).selectinload(Unit.subunits)
+            selectinload(Course.units).selectinload(Unit.exercise),
+            selectinload(Course.units).selectinload(Unit.subunits).selectinload(Subunit.quiz).selectinload(Quiz.questions).selectinload(QuizQuestion.options)
         )
     )
     return result.scalar_one()

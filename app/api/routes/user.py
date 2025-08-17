@@ -10,7 +10,7 @@ from app.core.config import get_app_settings
 from app.core.settings.app import AppSettings
 from app.models.domain.user import User
 
-from app.models.schemas.user import UserWithToken
+from app.models.schemas.user import UserWithToken, UserRead
 from app.models.schemas.progress import ProgressSchema
 from app.models.schemas.course import EnrollmentRead
 from app.models.schemas.submission import SubmissionRead
@@ -29,11 +29,7 @@ async def get_current_user(
     token = jwt.create_access_token_for_user(current_user, settings.secret_key.get_secret_value())
     
     return UserWithToken(
-        id=current_user.id,
-        username=current_user.username,
-        email=current_user.email,
-        role=current_user.role,
-        status=current_user.status,
+        **UserRead.model_validate(current_user).model_dump(by_alias=True),
         token=token
     )
 

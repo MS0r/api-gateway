@@ -3,10 +3,12 @@ from typing import List, Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import selectinload
 
 from app.models.domain.user import User
 from app.models.schemas.user import (UserCreate, UserUpdate)
 from app.db.errors import EntityDoesNotExist
+
 
 
 async def create_user(db: AsyncSession, user_create: UserCreate) -> User:
@@ -39,7 +41,7 @@ async def update_user(db: AsyncSession, user_id: int, user_update: UserUpdate) -
 
 async def get_user_by_username(db: AsyncSession, username: str) -> User | None:
     user = await db.execute(
-        select(User).where(User.username == username)
+        select(User).where(User.username == username).options(selectinload(User.quiz_passes),selectinload(User.enrollments),selectinload(User.submissions))
     )
     return user.scalar_one_or_none()
 

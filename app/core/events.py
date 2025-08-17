@@ -27,6 +27,6 @@ def create_stop_app_handler(
     @logger.catch
     async def stop_app() -> None:
         await close_db_connection(app)
-        await delete_entries_from_db(app)
+        #await delete_entries_from_db(app)
 
     return stop_app

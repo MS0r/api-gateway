@@ -21,7 +21,7 @@ async def get_submissions_from_user_course(db: AsyncSession, user_id: int, cours
     submissions = await db.execute(
         select(Submission).join(Submission.exercise).join(Exercise.unit).where(Unit.course_id == course_id, Submission.user_id == user_id)
     )
-    return [s for s in submissions.scalars().all()]
+    return submissions.scalars().all()
 
 async def update_submission(db: AsyncSession, submission_id: int, submission_update: SubmissionUpdate) -> Submission | None:
     submission = await db.get(Submission, submission_id)
@@ -33,8 +33,22 @@ async def update_submission(db: AsyncSession, submission_id: int, submission_upd
     await db.refresh(submission)
     return submission
 
+async def delete_submission(db: AsyncSession, submission_id: int) -> bool:
+    submission = await db.get(Submission, submission_id)
+    if not submission:
+        return False
+    await db.delete(submission)
+    await db.commit()
+    return True
+
 async def get_submissions_by_exercise_id(db: AsyncSession, exercise_id: int) -> List[Submission]:
     submissions = await db.execute(
         select(Submission).where(Submission.exercise_id == exercise_id)
     )
-    return [submission for submission in submissions.scalars().all()]
+    return submissions.scalars().all()
+
+async def get_submissions_by_user_exercise(db : AsyncSession, exercise_id : int, user_id : int) -> Submission | None:
+    submission = await db.execute(
+        select(Submission).where(Submission.exercise_id == exercise_id, Submission.user_id == user_id)
+    )
+    return submission.scalar_one_or_none()

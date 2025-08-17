@@ -16,7 +16,7 @@ router = APIRouter()
 async def create_quiz_router(
     db : AsyncSession = Depends(get_db_session),
     quiz : QuizCreate = Body(..., embed=True),
-    user: User = Depends(get_current_user_authorize)
+    user: User = Depends(get_current_user_authorize())
 ) -> QuizPassRead:
     quiz_pass = await quiz_crud.create_quiz(db, quiz)
     if not quiz_pass:
@@ -27,12 +27,14 @@ async def create_quiz_router(
 @router.post("/{quiz_id}/success", response_model=QuizPassRead, name="quiz:submit")
 async def submit_quiz(
     quiz_id: int,
-    user: User = Depends(get_current_user_authorize),
+    user: User = Depends(get_current_user_authorize()),
     db: AsyncSession = Depends(get_db_session)
 ) -> QuizPassRead:
-    quiz_pass = await quiz_pass_crud.create_quiz_pass(
-        db, QuizPassCreate(user_id=user.id, quiz_id=quiz_id)
-    )
+    quiz_pass = await quiz_pass_crud.get_quiz_passes_by_user(db, user.id, quiz_id)
     if not quiz_pass:
-        raise HTTPException(status_code=400, detail="Failed to submit quiz")
+        quiz_pass = await quiz_pass_crud.create_quiz_pass(
+            db, QuizPassCreate(user_id=user.id, quiz_id=quiz_id)
+        )
+        if not quiz_pass:
+            raise HTTPException(status_code=400, detail="Failed to submit quiz")
     return QuizPassRead.model_validate(quiz_pass)

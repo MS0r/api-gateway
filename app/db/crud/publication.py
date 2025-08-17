@@ -1,8 +1,9 @@
-from typing import List
-from sqlalchemy import select
+from typing import List, Tuple
+from sqlalchemy import select, func, case, distinct, or_, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from app.models.domain.publication import Question, Answer
-from app.models.domain.vote import Vote
+from app.models.domain.vote import Vote, VoteType
 from app.models.schemas.publication import (QuestionCreate, QuestionUpdate, AnswerCreate)
 from app.models.schemas.vote import VoteCreate, VoteUpdate
 
@@ -13,21 +14,60 @@ async def create_question(db: AsyncSession, question_create: QuestionCreate) -> 
     await db.refresh(question)
     return question
 
-async def get_question(db: AsyncSession, question_id: int) -> Question | None:
-    question = await db.get(Question, question_id)
-    return question if question else None
+async def get_question(db: AsyncSession, question_id: int, view : bool) -> Tuple[Question, int, int] | None:
+    if view:
+        await db.execute(
+            update(Question).where(Question.id == question_id).values(views=Question.views + 1)
+        )
+    question = await db.execute(
+        select(
+            Question,
+            func.count(distinct(case((Vote.vote == VoteType.UPVOTE and Vote.question_id == Question.id, Vote.id)))).label("upvote_count"),
+            func.count(distinct(case((Vote.vote == VoteType.DOWNVOTE and Vote.question_id == Question.id, Vote.id)))).label("downvote_count")
+        )
+        .outerjoin(Question.votes)
+        .where(Question.id == question_id)
+        .group_by(Question.id)
+        .options(selectinload(Question.user), selectinload(Question.answers).selectinload(Answer.user))
+    )
+    return question.first()
 
-async def get_questions_from_user(db: AsyncSession, user_id: int) -> List[Question]:
+async def get_questions_from_user(db: AsyncSession, user_id: int) -> List[Tuple[Question, int, int, int]]:
     questions = await db.execute(
         select(Question).where(Question.user_id == user_id)
     )
     return questions.scalars().all()
 
-async def get_last_questions(db: AsyncSession) -> List[Question]:
+async def get_last_questions(db: AsyncSession) -> List[Tuple[Question, int, int, int]]:
     questions = await db.execute(
-        select(Question).order_by(Question.created_at.desc()).limit(5)
+        select(
+            Question,
+            func.count(distinct(Answer.id)).label("answer_count"),
+            func.count(distinct(case((Vote.vote == VoteType.UPVOTE and Vote.question_id == Question.id, Vote.id)))).label("upvote_count"),
+            func.count(distinct(case((Vote.vote == VoteType.DOWNVOTE and Vote.question_id == Question.id, Vote.id)))).label("downvote_count")
+        )
+        .outerjoin(Question.answers)
+        .outerjoin(Question.votes)
+        .group_by(Question.id)
+        .order_by(Question.created_at.desc())
+        .limit(5)
     )
-    return questions.scalars().all()
+    return questions.all()
+
+async def search_questions(db: AsyncSession, search: str) -> List[Question]:
+    questions = await db.execute(
+        select(
+            Question,
+            func.count(distinct(Answer.id)).label("answer_count"),
+            func.count(distinct(case((Vote.vote == VoteType.UPVOTE and Vote.question_id == Question.id, Vote.id)))).label("upvote_count"),
+            func.count(distinct(case((Vote.vote == VoteType.DOWNVOTE and Vote.question_id == Question.id, Vote.id)))).label("downvote_count")
+        )
+        .outerjoin(Question.answers)
+        .outerjoin(Question.votes)
+        .where(Question.title.ilike(f"%{search}%"), Question.body.ilike(f"%{search}%"), or_(*[tag.ilike(f"%{search}%") for tag in Question.tags]))
+        .group_by(Question.id)
+    )
+    return questions.all()
 
 async def update_question(db: AsyncSession, question_id: int, question_update: QuestionUpdate) -> Question | None:
     question = await db.get(Question, question_id)

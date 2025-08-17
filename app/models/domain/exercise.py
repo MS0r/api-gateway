@@ -6,8 +6,8 @@ class Exercise(DateTimeMixin, IDMixin, Base):
     __tablename__ = "exercises"
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
-    expected_output = Column(String, nullable=False)
-    test_cases = Column(String, nullable=True)
+    exercise_schema = Column(String, nullable=False)
+    test_cases = Column(String, nullable=False)
 
     unit_id = Column(Integer, ForeignKey("units.id"), nullable=False)
 
