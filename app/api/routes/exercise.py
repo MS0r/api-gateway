@@ -4,7 +4,7 @@ from app.api.dependencies.auth import get_current_user_authorize
 from app.api.dependencies.database import get_db_session
 
 from app.models.domain.user import User
-from app.models.schemas.exercise import ExerciseCreate, ExerciseRead
+from app.models.schemas.exercise import ExerciseCreate, ExerciseRead, ExerciseUpdate
 from app.models.schemas.submission import SubmissionCreate, SubmissionRead, SubmissionCreateNoID
 from app.models.schemas.erlang import ErlangTestResponse
 
@@ -66,3 +66,14 @@ async def delete_submission_route(
     db: AsyncSession = Depends(get_db_session)
 ):
     return await submission_crud.delete_submission(db, submission_id)
+
+@router.put("/{exercise_id}", response_model=ExerciseRead, name="exercise:update_exercise")
+async def update_exercise_route(
+    exercise_id : int,
+    db: AsyncSession = Depends(get_db_session),
+    update : ExerciseUpdate =  Body(..., embed=True),
+):
+    exercise = await exercise_crud.update_exercise(db, exercise_id, update)
+    if not exercise:
+        raise HTTPException(status_code=404, detail="Exercise not found")
+    return ExerciseRead.model_validate(exercise)

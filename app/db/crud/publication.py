@@ -1,5 +1,5 @@
 from typing import List, Tuple
-from sqlalchemy import select, func, case, distinct, or_, update
+from sqlalchemy import select, func, case, distinct, update, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from app.models.domain.publication import Question, Answer
@@ -22,8 +22,8 @@ async def get_question(db: AsyncSession, question_id: int, view : bool) -> Tuple
     question = await db.execute(
         select(
             Question,
-            func.count(distinct(case((Vote.vote == VoteType.UPVOTE and Vote.question_id == Question.id, Vote.id)))).label("upvote_count"),
-            func.count(distinct(case((Vote.vote == VoteType.DOWNVOTE and Vote.question_id == Question.id, Vote.id)))).label("downvote_count")
+            func.count(distinct(case((Vote.vote == VoteType.UPVOTE, Vote.id)))).label("upvote_count"),
+            func.count(distinct(case((Vote.vote == VoteType.DOWNVOTE, Vote.id)))).label("downvote_count")
         )
         .outerjoin(Question.votes)
         .where(Question.id == question_id)
@@ -43,8 +43,8 @@ async def get_last_questions(db: AsyncSession) -> List[Tuple[Question, int, int,
         select(
             Question,
             func.count(distinct(Answer.id)).label("answer_count"),
-            func.count(distinct(case((Vote.vote == VoteType.UPVOTE and Vote.question_id == Question.id, Vote.id)))).label("upvote_count"),
-            func.count(distinct(case((Vote.vote == VoteType.DOWNVOTE and Vote.question_id == Question.id, Vote.id)))).label("downvote_count")
+            func.count(distinct(case((Vote.vote == VoteType.UPVOTE, Vote.id)))).label("upvote_count"),
+            func.count(distinct(case((Vote.vote == VoteType.DOWNVOTE, Vote.id)))).label("downvote_count")
         )
         .outerjoin(Question.answers)
         .outerjoin(Question.votes)
@@ -59,12 +59,12 @@ async def search_questions(db: AsyncSession, search: str) -> List[Question]:
         select(
             Question,
             func.count(distinct(Answer.id)).label("answer_count"),
-            func.count(distinct(case((Vote.vote == VoteType.UPVOTE and Vote.question_id == Question.id, Vote.id)))).label("upvote_count"),
-            func.count(distinct(case((Vote.vote == VoteType.DOWNVOTE and Vote.question_id == Question.id, Vote.id)))).label("downvote_count")
+            func.count(distinct(case((Vote.vote == VoteType.UPVOTE, Vote.id)))).label("upvote_count"),
+            func.count(distinct(case((Vote.vote == VoteType.DOWNVOTE, Vote.id)))).label("downvote_count")
         )
         .outerjoin(Question.answers)
         .outerjoin(Question.votes)
-        .where(Question.title.ilike(f"%{search}%"), Question.body.ilike(f"%{search}%"), or_(*[tag.ilike(f"%{search}%") for tag in Question.tags]))
+        .where(or_(Question.title.ilike(f"%{search}%"), Question.body.ilike(f"%{search}%"), func.array_to_string(Question.tags,' ').ilike(f"%{search}%")))
         .group_by(Question.id)
     )
     return questions.all()

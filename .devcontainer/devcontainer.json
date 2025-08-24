@@ -7,7 +7,7 @@
 
 	"service": "api-dev",
 
-	"workspaceFolder": "/workspace",
+	"workspaceFolder": "/api-gateway",
 
 	"features": {
         "ghcr.io/devcontainers/features/common-utils:2":{

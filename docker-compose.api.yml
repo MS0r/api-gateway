@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile.dev
     container_name: api-workspace
     volumes:
-      - .:/workspace:cached
+      - .:/api-gateway:cached
     depends_on:
       - db
       - sandbox
@@ -13,7 +13,7 @@ services:
     tty: true
   db:
     image: postgres
-    container_name: dev-postgres
+    container_name: test-postgres-api
     restart: unless-stopped
     shm_size: 128mb
     ports:

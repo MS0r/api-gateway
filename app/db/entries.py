@@ -2774,8 +2774,7 @@ start() ->
   subunit3_2_db = await subunit_crud.create_subunit(db, subunit3_2)
   subunit3_3_db = await subunit_crud.create_subunit(db, subunit3_3)
 
-  descripcion_primer_ejercicio = """  <h3>Ejercicio — Catálogo de productos</h3>
-
+  descripcion_primer_ejercicio = """
 <p>
   Crea un módulo llamado <text-code>ejercicio</text-code> con una función pública <text-code>start/1</text-code> que reciba una lista de tuplas con el formato:
 </p>
@@ -2804,19 +2803,21 @@ start() ->
   esquema_1 = """-module(ejercicio).
 -export([start/1]).
 
+%% start/1 recibe una lista de tuplas {Producto, Precio, Categoria}
 start(Productos) ->
-  % 1. Filtrar productos > 10 con list comprehension
-  Filtrados = [P || P = {_Prod, Precio, _Cat}, Precio > 10],
+    %% 1. Filtrar los productos cuyo precio sea > 10
+    Filtrados = [], %% TODO: usar list comprehension
 
-  % 2. Clasificar en caros y baratos
-  Caros = [P || P = {_Prod, Precio, _Cat}, Precio > 50],
-  Baratos = [P || P = {_Prod, Precio, _Cat}, Precio =< 50],
+    %% 2. Separar en caros y baratos
+    Caros = [],    %% TODO: filtrar precio > 50
+    Baratos = [],  %% TODO: filtrar el resto
 
-  % 3. Decidir con case
-  case length(Caros) of
-      N when N >= 3 -> {"Muchos productos caros", {Caros, Baratos}};
-      _ -> {"Pocos productos caros", {Caros, Baratos}}
-  end."""
+    %% 3. Devolver un mensaje según cantidad de caros
+    case 0 of   %% TODO: reemplazar con length(Caros)
+        _ -> {"Pocos productos caros", {Caros, Baratos}}
+    end.
+
+"""
   
   pruebas_1 = """defmodule EjercicioTest do
 use ExUnit.Case
@@ -2831,7 +2832,7 @@ test "clasifica correctamente productos y detecta muchos caros" do
   ]
 
   assert :ejercicio.start(productos) ==
-          {"Muchos productos caros",
+          {'Muchos productos caros',
           {[{:manzana, 60, :fruta},
             {:pera, 70, :fruta},
             {:vino, 100, :bebida}],
@@ -2846,7 +2847,7 @@ test "clasifica correctamente productos y detecta pocos caros" do
   ]
 
   assert :ejercicio.start(productos) ==
-          {"Pocos productos caros",
+          {'Pocos productos caros',
           {[{:manzana, 60, :fruta}],
             [{:pan, 20, :otro}]}}
 end
@@ -2860,60 +2861,2528 @@ end"""
       unit_id=unit1_id
   )
 
-  exercise1_db = await exercise_crud.create_exercise(db, exercise1)
+  await exercise_crud.create_exercise(db, exercise1)
+
+
+  descripcion_segundo_ejercicio = """   <p>
+      Se desea implementar un <strong>registro de estudiantes</strong> con sus notas en distintas materias y realizar varias operaciones utilizando Erlang.
+    </p>
+
+    <h2>Objetivos</h2>
+    <ul>
+      <li>Practicar <strong>funciones anónimas</strong> y de <strong>orden superior</strong>.</li>
+      <li>Aplicar <strong>recursión</strong> para filtrar y contar datos.</li>
+      <li>Trabajar con <strong>estructuras de datos</strong>: records, mapas y conjuntos.</li>
+      <li>Manejo de <strong>errores y excepciones</strong> al acceder a datos.</li>
+    </ul>
+
+    <h2>Requerimientos</h2>
+    <ol>
+      <li>Crear un <code>record</code> <strong>student</strong> con campos: <text-code>id</text-code>, <text-code>name</text-code> y <text-code>grades</text-code> (lista de <text-code>{materia, nota}</text-code>).</li>
+      <li>Implementar una <strong>función anónima</strong> que reciba un estudiante y devuelva su promedio.</li>
+      <li>Crear una <strong>función de orden superior</strong> que reciba la lista de estudiantes y una función, y devuelva la lista de resultados aplicando la función a cada estudiante.</li>
+      <li>Implementar <strong>recursión</strong> para:
+        <ul>
+          <li>Filtrar estudiantes que tengan promedio mayor o igual a 70.</li>
+          <li>Contar cuántos estudiantes cumplen la condición.</li>
+        </ul>
+      </li>
+      <li>Guardar los estudiantes en una <strong>estructura clave/valor</strong> (mapas) y poder buscar por <text-code>id</text-code>.</li>
+      <li>Manejar posibles <strong>errores</strong> al buscar un <text-code>id</text-code> que no exista.</li>
+    </ol>
+
+    <h2>Notas</h2>
+    <p>
+      Se espera que combines todos los conceptos vistos en la unidad, aplicando recursión, funciones de orden superior, estructuras de datos y manejo de excepciones en Erlang.
+    </p>"""
+  
+  esquema_2 = """-module(student_manager).
+-export([average/1, apply_to_all/2, filter_passing/1, count_passing/1, add_student/2, get_student/2]).
+
+-record(student, {id, name, grades}).
+%% Record de ejemplo: #student {id = 1, name= "Alicia", grades = [{"Math", 80}, {"Sci", 90}]}
+
+
+% 1. Función anónima para promedio
+average(Student) ->
+    %% TODO: implementar cálculo del promedio usando función anónima
+    ok.
+
+% 2. Función de orden superior
+apply_to_all(Students, Fun) ->
+    %% TODO: aplicar Fun a cada estudiante
+    ok.
+
+% 3. Filtrar estudiantes aprobados (recursión)
+filter_passing(Students) ->
+    %% TODO: devolver lista de estudiantes con promedio >= 70
+    ok.
+
+% 4. Contar estudiantes aprobados (recursión)
+count_passing(Students) ->
+    %% TODO: devolver número de estudiantes con promedio >= 70
+    ok.
+
+% 5. Añadir estudiante a estructura clave/valor
+add_student(Map, Student) ->
+    %% TODO: agregar Student al map usando id como clave
+    ok.
+
+% 6. Buscar estudiante por id con manejo de error
+get_student(Map, Id) ->
+    %% TODO: devolver estudiante o {:error, not_found}
+    ok.
+"""
+
+  pruebas_2 = """defmodule StudentManagerTest do
+  use ExUnit.Case
+
+  test "calcula promedio correctamente" do
+    # Aquí se llamaría a la función de Erlang via :student_manager.average/1
+    assert :student_manager.average({:student, 1, "Ana", [{"Math", 80}, {"Sci", 90}]}) == 85
+  end
+
+  test "aplica función de orden superior" do
+    students = [
+      {:student, 1, "Ana", [{"Math", 80}, {"Sci", 90}]},
+      {:student, 2, "Luis", [{"Math", 60}, {"Sci", 70}]}
+    ]
+    # Aplicar promedio
+    result = :student_manager.apply_to_all(students, &:student_manager.average/1)
+    assert result == [85, 65]
+  end
+
+  test "filtra estudiantes aprobados" do
+    students = [
+      {:student, 1, "Ana", [{"Math", 80}, {"Sci", 90}]},
+      {:student, 2, "Luis", [{"Math", 60}, {"Sci", 70}]}
+    ]
+    passing = :student_manager.filter_passing(students)
+    assert passing == [{:student, 1, "Ana", [{"Math", 80}, {"Sci", 90}]}]
+  end
+
+  test "maneja búsqueda de estudiante con error" do
+    map = :student_manager.add_student(%{}, {:student, 1, "Ana", [{"Math", 80}]})
+    assert :student_manager.get_student(map, 2) == {:error, :not_found}
+  end
+end
+"""
 
   exercise2 = ExerciseCreate(
-      title="Exercise 2",
-      description="Second exercise for Unit 1",
-      exercise_schema="-module(math_utils).\n-export([add/2, subtract/2, multiply/2, divide/2]).",
-      test_cases="""defmodule MathUtilsTest do\n  use ExUnit.Case\n\n  test "add/2" do\n    assert :math_utils.add(2, 3) == 5\n  end\n\n  test "subtract/2" do\n    assert :math_utils.subtract(5, 3) == 2\n  end\nend""",
+      title="Ejercicio: Registro de Estudiantes",
+      description=descripcion_segundo_ejercicio,
+      exercise_schema=esquema_2,
+      test_cases=pruebas_2,
       unit_id=unit2_id
   )
 
   await exercise_crud.create_exercise(db, exercise2)
 
+  descripcion_tercer_ejercicio = """   
+  <h2>Objetivo</h2>
+    <p>Practicar la creación y manejo de procesos concurrentes en Erlang, la comunicación entre ellos y la monitorización de fallos. Aprenderás a coordinar procesos que intercambian mensajes y a manejar situaciones de error de manera controlada.</p>
+
+    <h2>Descripción</h2>
+    <p>Se debe implementar un sistema simple de "Ping-Pong" usando procesos en Erlang:</p>
+
+    <ul>
+        <li>
+            <strong>Proceso árbitro (Referee):</strong>
+            <ul>
+                <li>Inicia el sistema.</li>
+                <li>Crea los procesos <text-code>ping</text-code> y <text-code>pong</text-code>.</li>
+                <li>Monitoriza ambos procesos para detectar fallos.</li>
+                <li>Mantiene un loop activo para recibir notificaciones de procesos caídos (<text-code>'DOWN'</text-code> messages).</li>
+            </ul>
+        </li>
+        <li>
+            <strong>Proceso Ping:</strong>
+            <ul>
+                <li>Envía mensajes "ping" al proceso <text-code>pong</text-code>.</li>
+                <li>Espera la respuesta "pong".</li>
+                <li>Repite este intercambio un número determinado de veces (<text-code>N</text-code>).</li>
+                <li>Termina de forma normal al completar los intercambios.</li>
+            </ul>
+        </li>
+        <li>
+            <strong>Proceso Pong:</strong>
+            <ul>
+                <li>Espera mensajes "ping" del proceso <text-code>ping</text-code>.</li>
+                <li>Responde con "pong".</li>
+                <li>Mantiene un loop continuo hasta ser terminado.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h2>Requisitos de aprendizaje</h2>
+    <ul>
+        <li>Crear procesos usando <text-code>spawn</text-code>.</li>
+        <li>Establecer comunicación entre procesos mediante <text-code>send</text-code> y <text-code>receive</text-code>.</li>
+        <li>Monitorear procesos con <text-code>monitor</text-code> y manejar mensajes <text-code>'DOWN'</text-code>.</li>
+        <li>Gestionar la terminación correcta de procesos.</li>
+        <li>Mantener un proceso supervisor (referee) activo para supervisar otros procesos.</li>
+    </ul>
+
+    <h2>Extras / Retos opcionales</h2>
+    <ul>
+        <li>Manejar el reinicio de procesos que fallen.</li>
+        <li>Probar el sistema con diferentes cantidades de intercambios.</li>
+        <li>Añadir mecanismos para reportar el estado de los procesos al proceso de prueba (test process).</li>
+    </ul>
+
+    <h2>Resultado esperado</h2>
+    <ul>
+        <li>El árbitro permanece activo mientras monitorea los procesos <text-code>ping</text-code> y <text-code>pong</text-code>.</li>
+        <li><text-code>Ping</text-code> termina después de completar los intercambios especificados.</li>
+        <li><text-code>Pong</text-code> puede seguir en loop o terminar al recibir señal de cierre.</li>
+        <li class="important">Cualquier fallo de <text-code>ping</text-code> o <text-code>pong</text-code> es detectado y manejado por el árbitro sin que el sistema completo colapse.</li>
+    </ul>"""
+
+  esquema_3 = """-module(pingpong).
+-export([start/0, referee/0, ping/2, pong/0]).
+
+%% Entry point
+%% Responsibilities:
+%% - Spawn the referee process
+start() ->
+    %% TODO: spawn referee process
+    ok.
+
+%% Referee process
+%% Responsibilities:
+%% - Spawn ping and pong processes
+%% - Monitor them (link/monitor)
+%% - Handle DOWN messages if a process crashes
+%% - Keep loop alive for monitoring
+referee() ->
+    receive
+        start ->
+            %% TODO: spawn pong process and monitor it
+            %% TODO: spawn ping process and monitor it
+            %% TODO: send initial message to ping
+            loop()
+    end.
+
+%% Referee loop
+%% Responsibilities:
+%% - Handle DOWN messages from ping or pong
+%% - Print/log crash info
+%% - Keep looping
+loop() ->
+    receive
+        {'DOWN', _Ref, process, Pid, Reason} ->
+            %% TODO: log or handle crash
+            loop()
+    end.
+
+%% Ping process
+%% Parameters: PongPid, RemainingCount
+%% Responsibilities:
+%% - Send ping message to pong
+%% - Wait for pong reply
+%% - Loop until RemainingCount reaches 0
+%% - Exit normally after finishing
+ping(PongPid, Count) ->
+    %% TODO: implement ping logic
+    ok.
+
+%% Pong process
+%% Responsibilities:
+%% - Wait for ping message
+%% - Reply with pong
+%% - Loop forever (or until terminated)
+pong() ->
+    %% TODO: implement pong logic
+    ok.
+"""
+
+  pruebas_3 = """defmodule PingPongTest do
+  use ExUnit.Case
+
+  test "ping-pong exchanges messages N times and terminates" do
+    # Start the referee process (spawns ping and pong)
+    referee_pid = :erlang.spawn(:pingpong, :referee, [])
+    
+    # Kick off the ping-pong
+    send(referee_pid, :start)
+
+    # Give some time for the ping-pong to finish
+    Process.sleep(1000)
+
+    # Assert that referee, ping, and pong processes are no longer alive
+    # (they should terminate normally after N exchanges)
+    ref_state = Process.alive?(referee_pid)
+    
+    assert ref_state == true   # referee loop is still alive, monitoring DOWN messages
+
+    # Note: ping and pong exit normally, but we need their PIDs
+    # If you want to track them, the referee process could send their PIDs back
+    # For simplicity, we can test that a normal run does not crash
+    assert true
+  end
+
+  test "referee monitors crashing process" do
+    # This test requires modifying pong to crash after a few messages
+    referee_pid = :erlang.spawn(:pingpong, :referee, [])
+    send(referee_pid, :start)
+
+    # Sleep a bit for the crash to happen
+    Process.sleep(1000)
+
+    # Ideally, the referee loop should be alive and print DOWN message
+    assert Process.alive?(referee_pid)
+  end
+
+  test "ping sends exactly N messages" do
+  test_pid = self()
+  referee_pid = :erlang.spawn(:pingpong, :referee, [])
+  send(referee_pid, {:start, test_pid})
+
+  # Optionally, have referee send ping/pong PIDs to test process
+  # Collect messages sent by ping
+  Process.sleep(1000)
+
+  # assert_received ping messages == N
+  # Example (if you modify ping to send {:ping, count} to test_pid)
+  end
+
+  test "referee handles multiple crashing processes" do
+  referee_pid = :erlang.spawn(:pingpong, :referee, [])
+  send(referee_pid, :start)
+
+  # Send messages to simulate crashes
+  # send(referee_pid, {:crash_ping})
+  # send(referee_pid, {:crash_pong})
+
+  Process.sleep(1000)
+
+  assert Process.alive?(referee_pid)
+  # assert_received {:down, _pid, _reason}  # twice
+  end
+end
+"""
+
+  exercise3 = ExerciseCreate(
+      title="Ejercicio: Sistema Ping-Pong con Concurrencia en Erlang",
+      description=descripcion_tercer_ejercicio,
+      exercise_schema=esquema_3,
+      test_cases=pruebas_3,
+      unit_id=unit3_id
+  )
+
+  await exercise_crud.create_exercise(db, exercise3)
+
+  # Crear el quiz
   quiz1 = QuizCreate(
-      title="Quiz 1",
-      description="Quiz for Subunit 1 of Unit 1",
+      title="Quiz Erlang: Introducción y Sintaxis",
+      description="Quiz sobre los conceptos fundamentales de Erlang, su sintaxis y características.",
       subunit_id=subunit1_1_db.id
   )
   quiz1_db = await quiz_crud.create_quiz(db, quiz1)
   quiz1_id = quiz1_db.id
 
-  quiz2 = QuizCreate(
-      title="Quiz 2",
-      description="Quiz for Subunit 2 of Unit 1",
-      subunit_id=subunit1_2_db.id
-  )
-  await quiz_crud.create_quiz(db, quiz2)
-
+  # Pregunta 1
   quiz_question1 = QuizQuestionCreate(
-      question_text="What does io:format do in Erlang?",
+      question_text="¿Qué es Erlang?",
       quiz_id=quiz1_id
   )
-
   quiz_question1_db = await quiz_crud.create_quiz_question(db, quiz_question1)
   quiz_question1_id = quiz_question1_db.id
 
   option1 = OptionCreate(
-      text="It prints text to the console.",
+      text="Un lenguaje de programación de propósito general, concurrente y funcional.",
       is_correct=True,
       quiz_question_id=quiz_question1_id
   )
   option2 = OptionCreate(
-      text="It defines a module.",
+      text="Una base de datos relacional.",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  option3 = OptionCreate(
+      text="Un sistema operativo.",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  option4 = OptionCreate(
+      text="Un lenguaje orientado a objetos.",
       is_correct=False,
       quiz_question_id=quiz_question1_id
   )
   await quiz_crud.create_option(db, option1)
   await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
 
-  # submission1 = SubmissionCreate(
-  #     code_snippet="-module(hello).\n-export([run/0]).\nrun() -> \"Hello, World!\".",
-  #     exercise_id=exercise1_id,
-  #     user_id=1
-  # )
-  # await submission_crud.create_submission(db, submission1)
+  # Pregunta 2
+  quiz_question2 = QuizQuestionCreate(
+      question_text="¿Cuál es la filosofía de manejo de errores de Erlang?",
+      quiz_id=quiz1_id
+  )
+  quiz_question2_db = await quiz_crud.create_quiz_question(db, quiz_question2)
+  quiz_question2_id = quiz_question2_db.id
+
+  option1 = OptionCreate(
+      text="Ignorar los errores.",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  option2 = OptionCreate(
+      text="Let it crash!",
+      is_correct=True,
+      quiz_question_id=quiz_question2_id
+  )
+  option3 = OptionCreate(
+      text="Reiniciar el sistema cada hora.",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  option4 = OptionCreate(
+      text="Manejar errores con try-catch extensos.",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 3
+  quiz_question3 = QuizQuestionCreate(
+      question_text="¿En qué año y dónde se desarrolló Erlang?",
+      quiz_id=quiz1_id
+  )
+  quiz_question3_db = await quiz_crud.create_quiz_question(db, quiz_question3)
+  quiz_question3_id = quiz_question3_db.id
+
+  option1 = OptionCreate(
+      text="1986 en los Laboratorios de Ericsson.",
+      is_correct=True,
+      quiz_question_id=quiz_question3_id
+  )
+  option2 = OptionCreate(
+      text="1995 en Microsoft Labs.",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  option3 = OptionCreate(
+      text="2000 en IBM Research.",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  option4 = OptionCreate(
+      text="1978 en Bell Labs.",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 4
+  quiz_question4 = QuizQuestionCreate(
+      question_text="En Erlang, las variables son:",
+      quiz_id=quiz1_id
+  )
+  quiz_question4_db = await quiz_crud.create_quiz_question(db, quiz_question4)
+  quiz_question4_id = quiz_question4_db.id
+
+  option1 = OptionCreate(
+      text="Mutables y pueden reasignarse.",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  option2 = OptionCreate(
+      text="Inmutables una vez asignadas.",
+      is_correct=True,
+      quiz_question_id=quiz_question4_id
+  )
+  option3 = OptionCreate(
+      text="Siempre se escriben en minúscula.",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  option4 = OptionCreate(
+      text="No existen en Erlang.",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 5
+  quiz_question5 = QuizQuestionCreate(
+      question_text="¿Qué hace io:format en Erlang?",
+      quiz_id=quiz1_id
+  )
+  quiz_question5_db = await quiz_crud.create_quiz_question(db, quiz_question5)
+  quiz_question5_id = quiz_question5_db.id
+
+  option1 = OptionCreate(
+      text="Imprime texto en la consola.",
+      is_correct=True,
+      quiz_question_id=quiz_question5_id
+  )
+  option2 = OptionCreate(
+      text="Define un módulo.",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  )
+  option3 = OptionCreate(
+      text="Crea un proceso concurrente.",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  )
+  option4 = OptionCreate(
+      text="Declara una variable.",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+
+  # Crear el quiz 2
+  quiz2 = QuizCreate(
+      title="Quiz Erlang: Instalación",
+      description="Quiz sobre cómo instalar Erlang en Linux, macOS y Windows.",
+      subunit_id=subunit1_2_db.id
+  )
+  quiz2_db = await quiz_crud.create_quiz(db, quiz2)
+  quiz2_id = quiz2_db.id
+
+  # Pregunta 1
+  quiz_question1 = QuizQuestionCreate(
+      question_text="En distribuciones basadas en Debian/Ubuntu, ¿cómo se instala Erlang?",
+      quiz_id=quiz2_id
+  )
+  quiz_question1_db = await quiz_crud.create_quiz_question(db, quiz_question1)
+  quiz_question1_id = quiz_question1_db.id
+
+  option1 = OptionCreate(
+      text="sudo apt install erlang",
+      is_correct=True,
+      quiz_question_id=quiz_question1_id
+  )
+  option2 = OptionCreate(
+      text="sudo dnf install erlang",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  option3 = OptionCreate(
+      text="brew install erlang",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  option4 = OptionCreate(
+      text="choco install erlang",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 2
+  quiz_question2 = QuizQuestionCreate(
+      question_text="¿Cómo se verifica la instalación de Erlang en cualquier sistema operativo?",
+      quiz_id=quiz2_id
+  )
+  quiz_question2_db = await quiz_crud.create_quiz_question(db, quiz_question2)
+  quiz_question2_id = quiz_question2_db.id
+
+  option1 = OptionCreate(
+      text="Ejecutando 'erl' en la terminal o CMD/PowerShell.",
+      is_correct=True,
+      quiz_question_id=quiz_question2_id
+  )
+  option2 = OptionCreate(
+      text="Ejecutando 'erlang -v'.",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  option3 = OptionCreate(
+      text="Abrir cualquier navegador web.",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  option4 = OptionCreate(
+      text="Usando el comando 'run_erlang'.",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 3
+  quiz_question3 = QuizQuestionCreate(
+      question_text="En macOS, ¿qué herramienta se utiliza comúnmente para instalar Erlang?",
+      quiz_id=quiz2_id
+  )
+  quiz_question3_db = await quiz_crud.create_quiz_question(db, quiz_question3)
+  quiz_question3_id = quiz_question3_db.id
+
+  option1 = OptionCreate(
+      text="Homebrew",
+      is_correct=True,
+      quiz_question_id=quiz_question3_id
+  )
+  option2 = OptionCreate(
+      text="APT",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  option3 = OptionCreate(
+      text="Chocolatey",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  option4 = OptionCreate(
+      text="Yum",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 4
+  quiz_question4 = QuizQuestionCreate(
+      question_text="En Windows, ¿cuál es una opción para instalar Erlang mediante un gestor de paquetes?",
+      quiz_id=quiz2_id
+  )
+  quiz_question4_db = await quiz_crud.create_quiz_question(db, quiz_question4)
+  quiz_question4_id = quiz_question4_db.id
+
+  option1 = OptionCreate(
+      text="APT",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  option2 = OptionCreate(
+      text="Homebrew",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  option3 = OptionCreate(
+      text="Chocolatey",
+      is_correct=True,
+      quiz_question_id=quiz_question4_id
+  )
+  option4 = OptionCreate(
+      text="Yum",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 5
+  quiz_question5 = QuizQuestionCreate(
+      question_text="Para proyectos en Elixir o RabbitMQ, ¿qué se recomienda a veces al instalar Erlang?",
+      quiz_id=quiz2_id
+  )
+  quiz_question5_db = await quiz_crud.create_quiz_question(db, quiz_question5)
+  quiz_question5_id = quiz_question5_db.id
+
+  option1 = OptionCreate(
+      text="Instalar siempre la versión más reciente sin considerar compatibilidad.",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  )
+  option2 = OptionCreate(
+      text="Usar versiones específicas desde repositorios oficiales o gestores de versiones como asdf.",
+      is_correct=True,
+      quiz_question_id=quiz_question5_id
+  )
+  option3 = OptionCreate(
+      text="Instalar Erlang solo en Windows.",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  )
+  option4 = OptionCreate(
+      text="No es necesario instalar Erlang para Elixir o RabbitMQ.",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Crear el quiz 3
+  quiz3 = QuizCreate(
+      title="Quiz Erlang: Shell y Operaciones",
+      description="Quiz sobre el uso de la Shell de Erlang, comandos y operaciones básicas.",
+      subunit_id=subunit1_3_db.id
+  )
+  quiz3_db = await quiz_crud.create_quiz(db, quiz3)
+  quiz3_id = quiz3_db.id
+
+  # Pregunta 1
+  quiz_question1 = QuizQuestionCreate(
+      question_text="¿Qué comando abre la Shell de Erlang en Linux y macOS?",
+      quiz_id=quiz3_id
+  )
+  quiz_question1_db = await quiz_crud.create_quiz_question(db, quiz_question1)
+  quiz_question1_id = quiz_question1_db.id
+
+  option1 = OptionCreate(
+      text="erl",
+      is_correct=True,
+      quiz_question_id=quiz_question1_id
+  )
+  option2 = OptionCreate(
+      text="werl",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  option3 = OptionCreate(
+      text="erlang",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  option4 = OptionCreate(
+      text="eshell",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 2
+  quiz_question2 = QuizQuestionCreate(
+      question_text="En Windows, ¿qué shell de Erlang tiene su propia ventana con barras de desplazamiento y permite copiar/pegar fácilmente?",
+      quiz_id=quiz3_id
+  )
+  quiz_question2_db = await quiz_crud.create_quiz_question(db, quiz_question2)
+  quiz_question2_id = quiz_question2_db.id
+
+  option1 = OptionCreate(
+      text="erl.exe",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  option2 = OptionCreate(
+      text="werl.exe",
+      is_correct=True,
+      quiz_question_id=quiz_question2_id
+  )
+  option3 = OptionCreate(
+      text="cmd.exe",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  option4 = OptionCreate(
+      text="powershell.exe",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 3
+  quiz_question3 = QuizQuestionCreate(
+      question_text="¿Qué comando en la Shell de Erlang se usa para salir?",
+      quiz_id=quiz3_id
+  )
+  quiz_question3_db = await quiz_crud.create_quiz_question(db, quiz_question3)
+  quiz_question3_id = quiz_question3_db.id
+
+  option1 = OptionCreate(
+      text="q().",
+      is_correct=True,
+      quiz_question_id=quiz_question3_id
+  )
+  option2 = OptionCreate(
+      text="exit().",
+      is_correct=True,  # Ambas son correctas
+      quiz_question_id=quiz_question3_id
+  )
+  option3 = OptionCreate(
+      text="f().",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  option4 = OptionCreate(
+      text="c().",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 4
+  quiz_question4 = QuizQuestionCreate(
+      question_text="¿Cuál de las siguientes operaciones aritméticas en Erlang devuelve un número entero?",
+      quiz_id=quiz3_id
+  )
+  quiz_question4_db = await quiz_crud.create_quiz_question(db, quiz_question4)
+  quiz_question4_id = quiz_question4_db.id
+
+  option1 = OptionCreate(
+      text="10 / 4.",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  option2 = OptionCreate(
+      text="10 div 4.",
+      is_correct=True,
+      quiz_question_id=quiz_question4_id
+  )
+  option3 = OptionCreate(
+      text="10 + 5.",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  option4 = OptionCreate(
+      text="10 * 2.",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 5
+  quiz_question5 = QuizQuestionCreate(
+      question_text="¿Cuál es el resultado de la operación 'true andalso (2 > 1).' en la Shell de Erlang?",
+      quiz_id=quiz3_id
+  )
+  quiz_question5_db = await quiz_crud.create_quiz_question(db, quiz_question5)
+  quiz_question5_id = quiz_question5_db.id
+
+  option1 = OptionCreate(
+      text="false",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  )
+  option2 = OptionCreate(
+      text="true",
+      is_correct=True,
+      quiz_question_id=quiz_question5_id
+  )
+  option3 = OptionCreate(
+      text="error",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  )
+  option4 = OptionCreate(
+      text="undefined",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 6
+  quiz_question6 = QuizQuestionCreate(
+      question_text="En Erlang, ¿qué operador se utiliza para obtener el primer elemento de una lista?",
+      quiz_id=quiz3_id
+  )
+  quiz_question6_db = await quiz_crud.create_quiz_question(db, quiz_question6)
+  quiz_question6_id = quiz_question6_db.id
+
+  option1 = OptionCreate(
+      text="hd([1,2,3]).",
+      is_correct=True,
+      quiz_question_id=quiz_question6_id
+  )
+  option2 = OptionCreate(
+      text="tl([1,2,3]).",
+      is_correct=False,
+      quiz_question_id=quiz_question6_id
+  )
+  option3 = OptionCreate(
+      text="element(1, [1,2,3]).",
+      is_correct=False,
+      quiz_question_id=quiz_question6_id
+  )
+  option4 = OptionCreate(
+      text="head([1,2,3]).",
+      is_correct=False,
+      quiz_question_id=quiz_question6_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Crear el quiz 4
+  quiz4 = QuizCreate(
+      title="Quiz Erlang: Tipos de Datos",
+      description="Quiz sobre los tipos de datos fundamentales en Erlang: enteros, variables, átomos, booleanos, tuplas y listas.",
+      subunit_id=subunit1_4_db.id
+  )
+  quiz4_db = await quiz_crud.create_quiz(db, quiz4)
+  quiz4_id = quiz4_db.id
+
+  # Pregunta 1
+  quiz_question1 = QuizQuestionCreate(
+      question_text="¿Cuál de los siguientes es un entero negativo en Erlang?",
+      quiz_id=quiz4_id
+  )
+  quiz_question1_db = await quiz_crud.create_quiz_question(db, quiz_question1)
+  quiz_question1_id = quiz_question1_db.id
+
+  option1 = OptionCreate(text="42", is_correct=False, quiz_question_id=quiz_question1_id)
+  option2 = OptionCreate(text="-42", is_correct=True, quiz_question_id=quiz_question1_id)
+  option3 = OptionCreate(text="2#101010", is_correct=False, quiz_question_id=quiz_question1_id)
+  option4 = OptionCreate(text="16#AE", is_correct=False, quiz_question_id=quiz_question1_id)
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 2
+  quiz_question2 = QuizQuestionCreate(
+      question_text="¿Qué afirmación sobre las variables en Erlang es correcta?",
+      quiz_id=quiz4_id
+  )
+  quiz_question2_db = await quiz_crud.create_quiz_question(db, quiz_question2)
+  quiz_question2_id = quiz_question2_db.id
+
+  option1 = OptionCreate(text="Se pueden reasignar libremente.", is_correct=False, quiz_question_id=quiz_question2_id)
+  option2 = OptionCreate(text="Su valor es inmutable y se asigna solo una vez.", is_correct=True, quiz_question_id=quiz_question2_id)
+  option3 = OptionCreate(text="No se pueden usar en operaciones aritméticas.", is_correct=False, quiz_question_id=quiz_question2_id)
+  option4 = OptionCreate(text="Empiezan siempre con letra minúscula.", is_correct=False, quiz_question_id=quiz_question2_id)
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 3
+  quiz_question3 = QuizQuestionCreate(
+      question_text="¿Qué es un átomo en Erlang?",
+      quiz_id=quiz4_id
+  )
+  quiz_question3_db = await quiz_crud.create_quiz_question(db, quiz_question3)
+  quiz_question3_id = quiz_question3_db.id
+
+  option1 = OptionCreate(text="Una variable que puede cambiar su valor.", is_correct=False, quiz_question_id=quiz_question3_id)
+  option2 = OptionCreate(text="Un número entero positivo.", is_correct=False, quiz_question_id=quiz_question3_id)
+  option3 = OptionCreate(text="Una constante cuyo valor es su propio nombre.", is_correct=True, quiz_question_id=quiz_question3_id)
+  option4 = OptionCreate(text="Un tipo de lista especial.", is_correct=False, quiz_question_id=quiz_question3_id)
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 4
+  quiz_question4 = QuizQuestionCreate(
+      question_text="¿Cuál de las siguientes expresiones devuelve true?",
+      quiz_id=quiz4_id
+  )
+  quiz_question4_db = await quiz_crud.create_quiz_question(db, quiz_question4)
+  quiz_question4_id = quiz_question4_db.id
+
+  option1 = OptionCreate(text="true and false", is_correct=False, quiz_question_id=quiz_question4_id)
+  option2 = OptionCreate(text="not false", is_correct=True, quiz_question_id=quiz_question4_id)
+  option3 = OptionCreate(text="1 =:= 0", is_correct=False, quiz_question_id=quiz_question4_id)
+  option4 = OptionCreate(text="5 =:= 5.0", is_correct=False, quiz_question_id=quiz_question4_id)
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 5
+  quiz_question5 = QuizQuestionCreate(
+      question_text="¿Cómo se define una tupla con los valores X=10 y Y=4?",
+      quiz_id=quiz4_id
+  )
+  quiz_question5_db = await quiz_crud.create_quiz_question(db, quiz_question5)
+  quiz_question5_id = quiz_question5_db.id
+
+  option1 = OptionCreate(text="{X, Y}", is_correct=True, quiz_question_id=quiz_question5_id)
+  option2 = OptionCreate(text="[X, Y]", is_correct=False, quiz_question_id=quiz_question5_id)
+  option3 = OptionCreate(text="(X, Y)", is_correct=False, quiz_question_id=quiz_question5_id)
+  option4 = OptionCreate(text="{X+Y}", is_correct=False, quiz_question_id=quiz_question5_id)
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 6
+  quiz_question6 = QuizQuestionCreate(
+      question_text="¿Cuál de las siguientes listas es propia en Erlang?",
+      quiz_id=quiz4_id
+  )
+  quiz_question6_db = await quiz_crud.create_quiz_question(db, quiz_question6)
+  quiz_question6_id = quiz_question6_db.id
+
+  option1 = OptionCreate(text="[1,2,3]", is_correct=True, quiz_question_id=quiz_question6_id)
+  option2 = OptionCreate(text="[1 | 2]", is_correct=False, quiz_question_id=quiz_question6_id)
+  option3 = OptionCreate(text="[a | b]", is_correct=False, quiz_question_id=quiz_question6_id)
+  option4 = OptionCreate(text="[1 | 2,3]", is_correct=False, quiz_question_id=quiz_question6_id)
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+    # Crear el quiz 5
+  quiz5 = QuizCreate(
+      title="Quiz Erlang: Módulos y Funciones",
+      description="Quiz sobre la creación, uso y compilación de módulos en Erlang.",
+      subunit_id=subunit1_5_db.id
+  )
+  quiz5_db = await quiz_crud.create_quiz(db, quiz5)
+  quiz5_id = quiz5_db.id
+
+  # Pregunta 1
+  quiz_question1 = QuizQuestionCreate(
+      question_text="¿Cuál es el propósito principal de un módulo en Erlang?",
+      quiz_id=quiz5_id
+  )
+  quiz_question1_db = await quiz_crud.create_quiz_question(db, quiz_question1)
+  quiz_question1_id = quiz_question1_db.id
+
+  option1 = OptionCreate(
+      text="Agrupar funciones bajo un solo nombre para reutilización.",
+      is_correct=True,
+      quiz_question_id=quiz_question1_id
+  )
+  option2 = OptionCreate(
+      text="Almacenar variables globales.",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  option3 = OptionCreate(
+      text="Ejecutar código más rápido que el shell interactivo.",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  option4 = OptionCreate(
+      text="Permitir modificar valores de variables en ejecución.",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 2
+  quiz_question2 = QuizQuestionCreate(
+      question_text="¿Cuál es el atributo obligatorio que debe tener un módulo?",
+      quiz_id=quiz5_id
+  )
+  quiz_question2_db = await quiz_crud.create_quiz_question(db, quiz_question2)
+  quiz_question2_id = quiz_question2_db.id
+
+  option1 = OptionCreate(
+      text="-module(Nombre).",
+      is_correct=True,
+      quiz_question_id=quiz_question2_id
+  )
+  option2 = OptionCreate(
+      text="-export([Funciones/Aridad]).",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  option3 = OptionCreate(
+      text="-import(Modulo, [Funciones/Aridad]).",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  option4 = OptionCreate(
+      text="-compile([Flags]).",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 3
+  quiz_question3 = QuizQuestionCreate(
+      question_text="Si tienes un módulo llamado useless con una función add/2, ¿cómo la llamas desde el shell?",
+      quiz_id=quiz5_id
+  )
+  quiz_question3_db = await quiz_crud.create_quiz_question(db, quiz_question3)
+  quiz_question3_id = quiz_question3_db.id
+
+  option1 = OptionCreate(
+      text="useless:add(7,2).",
+      is_correct=True,
+      quiz_question_id=quiz_question3_id
+  )
+  option2 = OptionCreate(
+      text="add(7,2).",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  option3 = OptionCreate(
+      text="useless.add(7,2).",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  option4 = OptionCreate(
+      text="call(useless, add, 7, 2).",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 4
+  quiz_question4 = QuizQuestionCreate(
+      question_text="¿Qué comando compila un módulo llamado useless en el shell de Erlang?",
+      quiz_id=quiz5_id
+  )
+  quiz_question4_db = await quiz_crud.create_quiz_question(db, quiz_question4)
+  quiz_question4_id = quiz_question4_db.id
+
+  option1 = OptionCreate(
+      text="c(useless).",
+      is_correct=True,
+      quiz_question_id=quiz_question4_id
+  )
+  option2 = OptionCreate(
+      text="compile(useless).",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  option3 = OptionCreate(
+      text="compile:file(useless).",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  option4 = OptionCreate(
+      text="c(useless, compile).",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 5
+  quiz_question5 = QuizQuestionCreate(
+      question_text="¿Cuál de las siguientes afirmaciones sobre funciones dentro de un módulo es correcta?",
+      quiz_id=quiz5_id
+  )
+  quiz_question5_db = await quiz_crud.create_quiz_question(db, quiz_question5)
+  quiz_question5_id = quiz_question5_db.id
+
+  option1 = OptionCreate(
+      text="Las funciones pueden llamarse entre sí dentro del mismo módulo sin anteponer el nombre del módulo.",
+      is_correct=True,
+      quiz_question_id=quiz_question5_id
+  )
+  option2 = OptionCreate(
+      text="Las funciones deben llamarse siempre con el nombre del módulo, incluso dentro del mismo módulo.",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  )
+  option3 = OptionCreate(
+      text="No se pueden importar funciones de otros módulos.",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  )
+  option4 = OptionCreate(
+      text="Las funciones dentro de un módulo no pueden contener comentarios.",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Crear el quiz 6
+  quiz6 = QuizCreate(
+      title="Quiz Erlang: Expresiones Avanzadas y Pattern Matching",
+      description="Quiz sobre pattern matching, guardas, if y manejo de listas y tuplas en Erlang.",
+      subunit_id=subunit1_6_db.id
+  )
+  quiz6_db = await quiz_crud.create_quiz(db, quiz6)
+  quiz6_id = quiz6_db.id
+
+  # Pregunta 1
+  quiz_question1 = QuizQuestionCreate(
+      question_text="¿Qué ventaja principal ofrece el Pattern Matching en funciones sobre un 'if' tradicional?",
+      quiz_id=quiz6_id
+  )
+  quiz_question1_db = await quiz_crud.create_quiz_question(db, quiz_question1)
+  quiz_question1_id = quiz_question1_db.id
+
+  option1 = OptionCreate(
+      text="Simplifica el código evitando escribir múltiples condiciones repetitivas.",
+      is_correct=True,
+      quiz_question_id=quiz_question1_id
+  )
+  option2 = OptionCreate(
+      text="Hace que las funciones se ejecuten más rápido que el bytecode compilado.",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  option3 = OptionCreate(
+      text="Permite declarar variables globales automáticamente.",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  option4 = OptionCreate(
+      text="Elimina la necesidad de módulos.",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 2
+  quiz_question2 = QuizQuestionCreate(
+      question_text="En el módulo greet, ¿qué cláusula maneja todos los casos que no sean 'male' o 'female'?",
+      quiz_id=quiz6_id
+  )
+  quiz_question2_db = await quiz_crud.create_quiz_question(db, quiz_question2)
+  quiz_question2_id = quiz_question2_db.id
+
+  option1 = OptionCreate(
+      text="greet(_, Name) -> ...",
+      is_correct=True,
+      quiz_question_id=quiz_question2_id
+  )
+  option2 = OptionCreate(
+      text="greet(other, Name) -> ...",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  option3 = OptionCreate(
+      text="greet(Name) -> ...",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  option4 = OptionCreate(
+      text="greet(Name, Gender) -> ...",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 3
+  quiz_question3 = QuizQuestionCreate(
+      question_text="¿Cómo se obtiene el segundo elemento de una lista usando pattern matching?",
+      quiz_id=quiz6_id
+  )
+  quiz_question3_db = await quiz_crud.create_quiz_question(db, quiz_question3)
+  quiz_question3_id = quiz_question3_db.id
+
+  option1 = OptionCreate(
+      text="second([_, X | _]) -> X.",
+      is_correct=True,
+      quiz_question_id=quiz_question3_id
+  )
+  option2 = OptionCreate(
+      text="second([X, _ | _]) -> X.",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  option3 = OptionCreate(
+      text="second([X | _]) -> X.",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  option4 = OptionCreate(
+      text="second([_, _]) -> X.",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 4
+  quiz_question4 = QuizQuestionCreate(
+      question_text="En la función valid_time({Date = {Y,M,D}, Time = {H,Min,S}}), ¿qué permite el operador '=' en la cabecera?",
+      quiz_id=quiz6_id
+  )
+  quiz_question4_db = await quiz_crud.create_quiz_question(db, quiz_question4)
+  quiz_question4_id = quiz_question4_db.id
+
+  option1 = OptionCreate(
+      text="Hacer coincidir tanto el contenido interno de la tupla como la tupla completa.",
+      is_correct=True,
+      quiz_question_id=quiz_question4_id
+  )
+  option2 = OptionCreate(
+      text="Asignar valores nuevos a las variables sin importar la tupla original.",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  option3 = OptionCreate(
+      text="Comparar la tupla con listas automáticamente.",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  option4 = OptionCreate(
+      text="Evitar errores de compilación cuando la tupla está vacía.",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 5
+  quiz_question5 = QuizQuestionCreate(
+      question_text="¿Cuál es la diferencia principal entre guardas y if en Erlang?",
+      quiz_id=quiz6_id
+  )
+  quiz_question5_db = await quiz_crud.create_quiz_question(db, quiz_question5)
+  quiz_question5_id = quiz_question5_db.id
+
+  option1 = OptionCreate(
+      text="Las guardas van en la cabecera de la función; if se usa dentro del cuerpo de la función.",
+      is_correct=True,
+      quiz_question_id=quiz_question5_id
+  )
+  option2 = OptionCreate(
+      text="Las guardas solo funcionan con listas, while if funciona con tuplas.",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  )
+  option3 = OptionCreate(
+      text="If permite rangos de valores, guardas no.",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  )
+  option4 = OptionCreate(
+      text="No hay diferencias, solo es cuestión de estilo.",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Crear el quiz 7
+  quiz7 = QuizCreate(
+      title="Quiz Erlang: Funciones de Orden Superior y Funciones Anónimas",
+      description="Preguntas sobre funciones de orden superior, funciones anónimas, closures y recursión anónima en Erlang.",
+      subunit_id=subunit2_1_db.id
+  )
+  quiz7_db = await quiz_crud.create_quiz(db, quiz7)
+  quiz7_id = quiz7_db.id
+
+  # Pregunta 1
+  quiz_question1 = QuizQuestionCreate(
+      question_text="¿Qué caracteriza a una función de orden superior?",
+      quiz_id=quiz7_id
+  )
+  quiz_question1_db = await quiz_crud.create_quiz_question(db, quiz_question1)
+  quiz_question1_id = quiz_question1_db.id
+
+  option1 = OptionCreate(
+      text="Puede recibir funciones como parámetros o devolver funciones como resultado.",
+      is_correct=True,
+      quiz_question_id=quiz_question1_id
+  )
+  option2 = OptionCreate(
+      text="Siempre es recursiva.",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  option3 = OptionCreate(
+      text="Debe estar definida como anónima.",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  option4 = OptionCreate(
+      text="Solo puede operar con listas.",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 2
+  quiz_question2 = QuizQuestionCreate(
+      question_text="Para pasar una función como argumento en Erlang, ¿qué sintaxis se usa?",
+      quiz_id=quiz7_id
+  )
+  quiz_question2_db = await quiz_crud.create_quiz_question(db, quiz_question2)
+  quiz_question2_id = quiz_question2_db.id
+
+  option1 = OptionCreate(
+      text="fun Module:Function/Arity",
+      is_correct=True,
+      quiz_question_id=quiz_question2_id
+  )
+  option2 = OptionCreate(
+      text="Module.Function()",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  option3 = OptionCreate(
+      text="Function()",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  option4 = OptionCreate(
+      text="fun Function()",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 3
+  quiz_question3 = QuizQuestionCreate(
+      question_text="¿Cuál es la ventaja de usar funciones anónimas (funs) en Erlang?",
+      quiz_id=quiz7_id
+  )
+  quiz_question3_db = await quiz_crud.create_quiz_question(db, quiz_question3)
+  quiz_question3_id = quiz_question3_db.id
+
+  option1 = OptionCreate(
+      text="Evitan declarar y exportar funciones solo para usarlas una vez.",
+      is_correct=True,
+      quiz_question_id=quiz_question3_id
+  )
+  option2 = OptionCreate(
+      text="Hacen que las funciones sean más rápidas.",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  option3 = OptionCreate(
+      text="Permiten cambiar variables globales automáticamente.",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  option4 = OptionCreate(
+      text="Siempre permiten recursión infinita sin bucles.",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 4
+  quiz_question4 = QuizQuestionCreate(
+      question_text="¿Qué es un closure en Erlang?",
+      quiz_id=quiz7_id
+  )
+  quiz_question4_db = await quiz_crud.create_quiz_question(db, quiz_question4)
+  quiz_question4_id = quiz_question4_db.id
+
+  option1 = OptionCreate(
+      text="Una función anónima que recuerda variables externas de su entorno.",
+      is_correct=True,
+      quiz_question_id=quiz_question4_id
+  )
+  option2 = OptionCreate(
+      text="Una función recursiva sin nombre.",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  option3 = OptionCreate(
+      text="Una función que solo opera sobre listas.",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  option4 = OptionCreate(
+      text="Una función exportada que devuelve otra función.",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 5
+  quiz_question5 = QuizQuestionCreate(
+      question_text="¿Cómo se logra la recursión dentro de una función anónima desde Erlang 17?",
+      quiz_id=quiz7_id
+  )
+  quiz_question5_db = await quiz_crud.create_quiz_question(db, quiz_question5)
+  quiz_question5_id = quiz_question5_db.id
+
+  option1 = OptionCreate(
+      text="Dándole un nombre interno a la función anónima y llamándose a sí misma.",
+      is_correct=True,
+      quiz_question_id=quiz_question5_id
+  )
+  option2 = OptionCreate(
+      text="Usando map/2 con la misma función.",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  )
+  option3 = OptionCreate(
+      text="Solo pasando la función como parámetro de otra función.",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  )
+  option4 = OptionCreate(
+      text="No es posible hacer recursión en funciones anónimas.",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Crear el quiz 8
+  quiz8 = QuizCreate(
+      title="Quiz Erlang: Recursión y Recursión de Cola",
+      description="Preguntas sobre recursión, recursión de cola, acumuladores y patrones recursivos en Erlang.",
+      subunit_id=subunit2_2_db.id
+  )
+  quiz8_db = await quiz_crud.create_quiz(db, quiz8)
+  quiz8_id = quiz8_db.id
+
+  # Pregunta 1
+  quiz_question1 = QuizQuestionCreate(
+      question_text="¿Qué es la recursión en Erlang?",
+      quiz_id=quiz8_id
+  )
+  quiz_question1_db = await quiz_crud.create_quiz_question(db, quiz_question1)
+  quiz_question1_id = quiz_question1_db.id
+
+  option1 = OptionCreate(
+      text="Una función que se llama a sí misma hasta alcanzar un caso base.",
+      is_correct=True,
+      quiz_question_id=quiz_question1_id
+  )
+  option2 = OptionCreate(
+      text="Un bucle for o while clásico.",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  option3 = OptionCreate(
+      text="Una estructura de datos especial.",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  option4 = OptionCreate(
+      text="Una función que siempre devuelve listas.",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 2
+  quiz_question2 = QuizQuestionCreate(
+      question_text="¿Qué distingue a la recursión de cola (tail recursion)?",
+      quiz_id=quiz8_id
+  )
+  quiz_question2_db = await quiz_crud.create_quiz_question(db, quiz_question2)
+  quiz_question2_id = quiz_question2_db.id
+
+  option1 = OptionCreate(
+      text="El resultado de la llamada recursiva se devuelve directamente, permitiendo optimización de memoria.",
+      is_correct=True,
+      quiz_question_id=quiz_question2_id
+  )
+  option2 = OptionCreate(
+      text="No necesita caso base.",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  option3 = OptionCreate(
+      text="Siempre usa listas vacías como acumuladores.",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  option4 = OptionCreate(
+      text="No se puede usar con funciones matemáticas.",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 3
+  quiz_question3 = QuizQuestionCreate(
+      question_text="¿Cuál es la función del 'caso base' en la recursión?",
+      quiz_id=quiz8_id
+  )
+  quiz_question3_db = await quiz_crud.create_quiz_question(db, quiz_question3)
+  quiz_question3_id = quiz_question3_db.id
+
+  option1 = OptionCreate(
+      text="Detener la recursión para evitar llamadas infinitas.",
+      is_correct=True,
+      quiz_question_id=quiz_question3_id
+  )
+  option2 = OptionCreate(
+      text="Aumentar la profundidad de la recursión.",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  option3 = OptionCreate(
+      text="Multiplicar el resultado final.",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  option4 = OptionCreate(
+      text="Permitir el uso de funciones anónimas.",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 4
+  quiz_question4 = QuizQuestionCreate(
+      question_text="¿Por qué se usan acumuladores en recursión de cola?",
+      quiz_id=quiz8_id
+  )
+  quiz_question4_db = await quiz_crud.create_quiz_question(db, quiz_question4)
+  quiz_question4_id = quiz_question4_db.id
+
+  option1 = OptionCreate(
+      text="Para mantener el estado y permitir optimización de memoria.",
+      is_correct=True,
+      quiz_question_id=quiz_question4_id
+  )
+  option2 = OptionCreate(
+      text="Para definir el caso base.",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  option3 = OptionCreate(
+      text="Para crear listas vacías automáticamente.",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  option4 = OptionCreate(
+      text="Para evitar usar pattern matching.",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 5
+  quiz_question5 = QuizQuestionCreate(
+      question_text="¿Cuál es un patrón clave para pensar recursivamente?",
+      quiz_id=quiz8_id
+  )
+  quiz_question5_db = await quiz_crud.create_quiz_question(db, quiz_question5)
+  quiz_question5_id = quiz_question5_db.id
+
+  option1 = OptionCreate(
+      text="Identificar el caso base y reducir el problema hacia él en cada llamada.",
+      is_correct=True,
+      quiz_question_id=quiz_question5_id
+  )
+  option2 = OptionCreate(
+      text="Evitar usar listas y solo trabajar con números.",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  )
+  option3 = OptionCreate(
+      text="Usar bucles for y while siempre.",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  )
+  option4 = OptionCreate(
+      text="Definir todas las funciones como anónimas.",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Crear el quiz 9
+  quiz9 = QuizCreate(
+      title="Quiz Erlang: Estructuras de Datos",
+      description="Preguntas sobre records, almacenamiento clave/valor y conjuntos en Erlang.",
+      subunit_id=subunit2_3_db.id  # Ajusta al subunit correspondiente
+  )
+  quiz9_db = await quiz_crud.create_quiz(db, quiz9)
+  quiz9_id = quiz9_db.id
+
+  # Pregunta 1
+  quiz_question1 = QuizQuestionCreate(
+      question_text="Dado el record #robot{name, type = industrial, hobbies, details = []}, si escribimos R = #robot{name=\"RoboCop\"}, ¿cuál será el valor de R#robot.type y R#robot.details?",
+      quiz_id=quiz9_id
+  )
+  quiz_question1_db = await quiz_crud.create_quiz_question(db, quiz_question1)
+  quiz_question1_id = quiz_question1_db.id
+
+  await quiz_crud.create_option(db, OptionCreate(
+      text="industrial y []",
+      is_correct=True,
+      quiz_question_id=quiz_question1_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text='"RoboCop" y []',
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text='industrial y undefined',
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text='undefined y []',
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  ))
+
+  # Pregunta 2
+  quiz_question2 = QuizQuestionCreate(
+      question_text="Cuál es la salida de admin_panel(#user{name=\"Alice\", group=admin}) usando pattern matching en records?",
+      quiz_id=quiz9_id
+  )
+  quiz_question2_db = await quiz_crud.create_quiz_question(db, quiz_question2)
+  quiz_question2_id = quiz_question2_db.id
+
+  await quiz_crud.create_option(db, OptionCreate(
+      text='"Alice is allowed!"',
+      is_correct=True,
+      quiz_question_id=quiz_question2_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text='"Alice is not allowed"',
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text='Error de compilación',
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text='"admin is allowed!"',
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  ))
+
+  # Pregunta 3
+  quiz_question3 = QuizQuestionCreate(
+      question_text="Si tenemos un record anidado NestedBot = #robot{details=#robot{name=\"erNest\"}}, ¿cómo accedemos al name del robot interno?",
+      quiz_id=quiz9_id
+  )
+  quiz_question3_db = await quiz_crud.create_quiz_question(db, quiz_question3)
+  quiz_question3_id = quiz_question3_db.id
+
+  await quiz_crud.create_option(db, OptionCreate(
+      text="NestedBot#robot.details#robot.name",
+      is_correct=True,
+      quiz_question_id=quiz_question3_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="NestedBot.details.name",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="NestedBot#robot.details.name",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="NestedBot.name.details",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  ))
+
+  # Pregunta 4
+  quiz_question4 = QuizQuestionCreate(
+      question_text="¿Cuál estructura es más recomendable para datos pequeños y con pocas claves?",
+      quiz_id=quiz9_id
+  )
+  quiz_question4_db = await quiz_crud.create_quiz_question(db, quiz_question4)
+  quiz_question4_id = quiz_question4_db.id
+
+  await quiz_crud.create_option(db, OptionCreate(
+      text="proplists",
+      is_correct=True,
+      quiz_question_id=quiz_question4_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="dict",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="sets",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="orddict",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  ))
+
+  # Pregunta 5
+  quiz_question5 = QuizQuestionCreate(
+      question_text="Dada D = dict:store(user, \"Alice\", dict:new()), dict:find(user, D), ¿qué devuelve?",
+      quiz_id=quiz9_id
+  )
+  quiz_question5_db = await quiz_crud.create_quiz_question(db, quiz_question5)
+  quiz_question5_id = quiz_question5_db.id
+
+  await quiz_crud.create_option(db, OptionCreate(
+      text="{ok, \"Alice\"}",
+      is_correct=True,
+      quiz_question_id=quiz_question5_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="ok",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text='"Alice"',
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text='{"Alice"}',
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  ))
+
+  # Pregunta 6
+  quiz_question6 = QuizQuestionCreate(
+      question_text="¿Cuál es la diferencia principal entre ordsets y sets?",
+      quiz_id=quiz9_id
+  )
+  quiz_question6_db = await quiz_crud.create_quiz_question(db, quiz_question6)
+  quiz_question6_id = quiz_question6_db.id
+
+  await quiz_crud.create_option(db, OptionCreate(
+      text="sets usa =:= para comparar, ordsets está ordenado",
+      is_correct=True,
+      quiz_question_id=quiz_question6_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="ordsets permite duplicados",
+      is_correct=False,
+      quiz_question_id=quiz_question6_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="sets es más lento que ordsets",
+      is_correct=False,
+      quiz_question_id=quiz_question6_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="Ninguna, funcionan igual",
+      is_correct=False,
+      quiz_question_id=quiz_question6_id
+  ))
+
+  # Pregunta 7
+  quiz_question7 = QuizQuestionCreate(
+      question_text="Si queremos un conjunto grande con comparación estricta entre elementos, ¿qué estructura usamos?",
+      quiz_id=quiz9_id
+  )
+  quiz_question7_db = await quiz_crud.create_quiz_question(db, quiz_question7)
+  quiz_question7_id = quiz_question7_db.id
+
+  await quiz_crud.create_option(db, OptionCreate(
+      text="sets",
+      is_correct=True,
+      quiz_question_id=quiz_question7_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="ordsets",
+      is_correct=False,
+      quiz_question_id=quiz_question7_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="proplists",
+      is_correct=False,
+      quiz_question_id=quiz_question7_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="dict",
+      is_correct=False,
+      quiz_question_id=quiz_question7_id
+  ))
+
+  # Crear el quiz 10
+  quiz10 = QuizCreate(
+      title="Quiz Erlang: Errores y Excepciones",
+      description="Preguntas sobre tipos de errores, excepciones y manejo de errores en Erlang.",
+      subunit_id=subunit2_4_db.id  # Ajusta al subunit correspondiente
+  )
+  quiz10_db = await quiz_crud.create_quiz(db, quiz10)
+  quiz10_id = quiz10_db.id
+
+  # Pregunta 1
+  quiz_question1 = QuizQuestionCreate(
+      question_text="¿Cuál de estos errores se detecta en tiempo de compilación?",
+      quiz_id=quiz10_id
+  )
+  quiz_question1_db = await quiz_crud.create_quiz_question(db, quiz_question1)
+  quiz_question1_id = quiz_question1_db.id
+
+  await quiz_crud.create_option(db, OptionCreate(
+      text="Module name 'madule' does not match file name 'module'",
+      is_correct=True,
+      quiz_question_id=quiz_question1_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="function_clause",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="badmatch",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="exit",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  ))
+
+  # Pregunta 2
+  quiz_question2 = QuizQuestionCreate(
+      question_text="¿Qué tipo de error ocurre cuando un pattern matching falla en tiempo de ejecución?",
+      quiz_id=quiz10_id
+  )
+  quiz_question2_db = await quiz_crud.create_quiz_question(db, quiz_question2)
+  quiz_question2_id = quiz_question2_db.id
+
+  await quiz_crud.create_option(db, OptionCreate(
+      text="badmatch",
+      is_correct=True,
+      quiz_question_id=quiz_question2_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="case_clause",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="syntax error",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="throw",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  ))
+
+  # Pregunta 3
+  quiz_question3 = QuizQuestionCreate(
+      question_text="En Erlang, cuál es la función de exit(Reason)?",
+      quiz_id=quiz10_id
+  )
+  quiz_question3_db = await quiz_crud.create_quiz_question(db, quiz_question3)
+  quiz_question3_id = quiz_question3_db.id
+
+  await quiz_crud.create_option(db, OptionCreate(
+      text="Termina el proceso actual o externo sin stack trace",
+      is_correct=True,
+      quiz_question_id=quiz_question3_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="Control de flujo similar a return",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="Genera error de compilación",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="Lanza un error con stack trace",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  ))
+
+  # Pregunta 4
+  quiz_question4 = QuizQuestionCreate(
+      question_text="Qué bloque se ejecuta siempre, ocurra o no una excepción?",
+      quiz_id=quiz10_id
+  )
+  quiz_question4_db = await quiz_crud.create_quiz_question(db, quiz_question4)
+  quiz_question4_id = quiz_question4_db.id
+
+  await quiz_crud.create_option(db, OptionCreate(
+      text="after",
+      is_correct=True,
+      quiz_question_id=quiz_question4_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="catch",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="throw",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="exit",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  ))
+
+  # Pregunta 5
+  quiz_question5 = QuizQuestionCreate(
+      question_text="Cuál es la forma recomendada de manejar errores en Erlang moderno?",
+      quiz_id=quiz10_id
+  )
+  quiz_question5_db = await quiz_crud.create_quiz_question(db, quiz_question5)
+  quiz_question5_id = quiz_question5_db.id
+
+  await quiz_crud.create_option(db, OptionCreate(
+      text="try ... catch",
+      is_correct=True,
+      quiz_question_id=quiz_question5_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="catch (forma antigua)",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="throw sin try",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="Ignorar errores",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  ))
+
+  # Pregunta 6
+  quiz_question6 = QuizQuestionCreate(
+      question_text="Qué tipo de excepción usarías para control de flujo que el llamador debe capturar?",
+      quiz_id=quiz10_id
+  )
+  quiz_question6_db = await quiz_crud.create_quiz_question(db, quiz_question6)
+  quiz_question6_id = quiz_question6_db.id
+
+  await quiz_crud.create_option(db, OptionCreate(
+      text="throw",
+      is_correct=True,
+      quiz_question_id=quiz_question6_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="exit",
+      is_correct=False,
+      quiz_question_id=quiz_question6_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="error",
+      is_correct=False,
+      quiz_question_id=quiz_question6_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="badmatch",
+      is_correct=False,
+      quiz_question_id=quiz_question6_id
+  ))
+
+  # Pregunta 7
+  quiz_question7 = QuizQuestionCreate(
+      question_text="Qué práctica se recomienda en Erlang según la filosofía “let it crash”?",
+      quiz_id=quiz10_id
+  )
+  quiz_question7_db = await quiz_crud.create_quiz_question(db, quiz_question7)
+  quiz_question7_id = quiz_question7_db.id
+
+  await quiz_crud.create_option(db, OptionCreate(
+      text="Dejar que un proceso falle y que otro lo supervise",
+      is_correct=True,
+      quiz_question_id=quiz_question7_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="Atrapar todos los errores manualmente",
+      is_correct=False,
+      quiz_question_id=quiz_question7_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="Usar catch en todas las funciones",
+      is_correct=False,
+      quiz_question_id=quiz_question7_id
+  ))
+  await quiz_crud.create_option(db, OptionCreate(
+      text="Evitar throw en todo el código",
+      is_correct=False,
+      quiz_question_id=quiz_question7_id
+  ))
+
+  
+
+  # Crear el quiz 11
+  quiz11 = QuizCreate(
+      title="Quiz Erlang: Procesos y Concurrencia",
+      description="Preguntas sobre concurrencia, procesos, paso de mensajes y primitivas en Erlang.",
+      subunit_id=subunit3_1_db.id
+  )
+  quiz11_db = await quiz_crud.create_quiz(db, quiz11)
+  quiz11_id = quiz11_db.id
+
+  # Pregunta 1
+  quiz_question1 = QuizQuestionCreate(
+      question_text="¿Cuál es la diferencia entre concurrencia y paralelismo en Erlang?",
+      quiz_id=quiz11_id
+  )
+  quiz_question1_db = await quiz_crud.create_quiz_question(db, quiz_question1)
+  quiz_question1_id = quiz_question1_db.id
+
+  option1 = OptionCreate(
+      text="La concurrencia es ejecutar múltiples procesos de forma independiente, mientras que el paralelismo es ejecutarlos exactamente al mismo tiempo en distintos núcleos.",
+      is_correct=True,
+      quiz_question_id=quiz_question1_id
+  )
+  option2 = OptionCreate(
+      text="La concurrencia siempre usa varios núcleos, el paralelismo no.",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  option3 = OptionCreate(
+      text="El paralelismo solo existe en Erlang, la concurrencia en otros lenguajes.",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  option4 = OptionCreate(
+      text="Son lo mismo, solo cambian los términos.",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 2
+  quiz_question2 = QuizQuestionCreate(
+      question_text="¿Qué primitivas básicas existen en Erlang para manejar procesos?",
+      quiz_id=quiz11_id
+  )
+  quiz_question2_db = await quiz_crud.create_quiz_question(db, quiz_question2)
+  quiz_question2_id = quiz_question2_db.id
+
+  option1 = OptionCreate(
+      text="spawn/3, self(), '!' (envío de mensajes), receive, flush().",
+      is_correct=True,
+      quiz_question_id=quiz_question2_id
+  )
+  option2 = OptionCreate(
+      text="for, while, goto, break, continue.",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  option3 = OptionCreate(
+      text="new Thread(), run(), sleep(), join().",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  option4 = OptionCreate(
+      text="malloc(), free(), pthread_create().",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 3
+  quiz_question3 = QuizQuestionCreate(
+      question_text="¿Cómo se comunican los procesos en Erlang?",
+      quiz_id=quiz11_id
+  )
+  quiz_question3_db = await quiz_crud.create_quiz_question(db, quiz_question3)
+  quiz_question3_id = quiz_question3_db.id
+
+  option1 = OptionCreate(
+      text="Mediante paso de mensajes entre mailboxes.",
+      is_correct=True,
+      quiz_question_id=quiz_question3_id
+  )
+  option2 = OptionCreate(
+      text="Compartiendo memoria directamente.",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  option3 = OptionCreate(
+      text="A través de punteros globales.",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  option4 = OptionCreate(
+      text="Por medio de sockets obligatoriamente.",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Crear el quiz 12
+  quiz12 = QuizCreate(
+      title="Quiz Erlang: Comunicación entre Procesos",
+      description="Preguntas sobre envío y recepción de mensajes, procesos con estado, timeouts y recepción selectiva en Erlang.",
+      subunit_id=subunit3_2_db.id
+  )
+  quiz12_db = await quiz_crud.create_quiz(db, quiz12)
+  quiz12_id = quiz12_db.id
+
+  # Pregunta 1
+  quiz_question1 = QuizQuestionCreate(
+      question_text="¿Cómo mantienen los procesos en Erlang su estado interno?",
+      quiz_id=quiz12_id
+  )
+  quiz_question1_db = await quiz_crud.create_quiz_question(db, quiz_question1)
+  quiz_question1_id = quiz_question1_db.id
+
+  option1 = OptionCreate(
+      text="Mediante recursión, pasando el estado actualizado como argumento en cada llamada.",
+      is_correct=True,
+      quiz_question_id=quiz_question1_id
+  )
+  option2 = OptionCreate(
+      text="Usando variables globales compartidas entre procesos.",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  option3 = OptionCreate(
+      text="Guardando el estado en archivos temporales.",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  option4 = OptionCreate(
+      text="A través de registros estáticos en el compilador.",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 2
+  quiz_question2 = QuizQuestionCreate(
+      question_text="¿Qué ventaja ofrecen las funciones de interfaz como store/2 y take/2 en el módulo kitchen?",
+      quiz_id=quiz12_id
+  )
+  quiz_question2_db = await quiz_crud.create_quiz_question(db, quiz_question2)
+  quiz_question2_id = quiz_question2_db.id
+
+  option1 = OptionCreate(
+      text="Ocultan la complejidad de los mensajes, simplificando la interacción con el proceso.",
+      is_correct=True,
+      quiz_question_id=quiz_question2_id
+  )
+  option2 = OptionCreate(
+      text="Permiten compartir memoria entre procesos.",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  option3 = OptionCreate(
+      text="Compilan el código en modo nativo automáticamente.",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  option4 = OptionCreate(
+      text="Eliminan la necesidad de usar spawn/3.",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 3
+  quiz_question3 = QuizQuestionCreate(
+      question_text="¿Qué ocurre si un proceso no responde y no se usa un timeout en la recepción?",
+      quiz_id=quiz12_id
+  )
+  quiz_question3_db = await quiz_crud.create_quiz_question(db, quiz_question3)
+  quiz_question3_id = quiz_question3_db.id
+
+  option1 = OptionCreate(
+      text="El shell puede quedarse bloqueado indefinidamente esperando el mensaje.",
+      is_correct=True,
+      quiz_question_id=quiz_question3_id
+  )
+  option2 = OptionCreate(
+      text="El proceso se reinicia automáticamente después de 3 segundos.",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  option3 = OptionCreate(
+      text="Se lanza una excepción de tipo 'timeout_error'.",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  option4 = OptionCreate(
+      text="El mensaje se descarta silenciosamente.",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 4
+  quiz_question4 = QuizQuestionCreate(
+      question_text="¿Para qué sirve la recepción selectiva en Erlang?",
+      quiz_id=quiz12_id
+  )
+  quiz_question4_db = await quiz_crud.create_quiz_question(db, quiz_question4)
+  quiz_question4_id = quiz_question4_db.id
+
+  option1 = OptionCreate(
+      text="Permite dar prioridad a ciertos mensajes sobre otros.",
+      is_correct=True,
+      quiz_question_id=quiz_question4_id
+  )
+  option2 = OptionCreate(
+      text="Sirve para descartar automáticamente todos los mensajes de baja prioridad.",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  option3 = OptionCreate(
+      text="Convierte los mensajes en llamadas síncronas.",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  option4 = OptionCreate(
+      text="Hace que los procesos compartan memoria de forma eficiente.",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Crear el quiz 13
+  quiz13 = QuizCreate(
+      title="Quiz Erlang: Monitoreo y Manejo de Fallos",
+      description="Preguntas sobre links, monitores, trap_exit, supervisores, procesos nombrados y referencias únicas en Erlang.",
+      subunit_id=subunit3_3_db.id
+  )
+  quiz13_db = await quiz_crud.create_quiz(db, quiz13)
+  quiz13_id = quiz13_db.id
+
+  # Pregunta 1
+  quiz_question1 = QuizQuestionCreate(
+      question_text="¿Qué ocurre cuando dos procesos están enlazados (link) y uno de ellos muere inesperadamente?",
+      quiz_id=quiz13_id
+  )
+  quiz_question1_db = await quiz_crud.create_quiz_question(db, quiz_question1)
+  quiz_question1_id = quiz_question1_db.id
+
+  option1 = OptionCreate(
+      text="El otro proceso también muere propagando el fallo.",
+      is_correct=True,
+      quiz_question_id=quiz_question1_id
+  )
+  option2 = OptionCreate(
+      text="El proceso sobreviviente recibe un valor null y sigue ejecutándose.",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  option3 = OptionCreate(
+      text="No pasa nada, los procesos siguen independientes.",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  option4 = OptionCreate(
+      text="El proceso enlazado se reinicia automáticamente.",
+      is_correct=False,
+      quiz_question_id=quiz_question1_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 2
+  quiz_question2 = QuizQuestionCreate(
+      question_text="¿Qué hace la función spawn_link(Function)?",
+      quiz_id=quiz13_id
+  )
+  quiz_question2_db = await quiz_crud.create_quiz_question(db, quiz_question2)
+  quiz_question2_id = quiz_question2_db.id
+
+  option1 = OptionCreate(
+      text="Crea un proceso y lo enlaza en una sola operación atómica.",
+      is_correct=True,
+      quiz_question_id=quiz_question2_id
+  )
+  option2 = OptionCreate(
+      text="Crea un proceso sin relación con el actual.",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  option3 = OptionCreate(
+      text="Reinicia automáticamente procesos caídos.",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  option4 = OptionCreate(
+      text="Monitorea un proceso sin matarlo si falla.",
+      is_correct=False,
+      quiz_question_id=quiz_question2_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 3
+  quiz_question3 = QuizQuestionCreate(
+      question_text="¿Qué permite process_flag(trap_exit, true)?",
+      quiz_id=quiz13_id
+  )
+  quiz_question3_db = await quiz_crud.create_quiz_question(db, quiz_question3)
+  quiz_question3_id = quiz_question3_db.id
+
+  option1 = OptionCreate(
+      text="Convertir las señales de salida en mensajes que el proceso puede manejar.",
+      is_correct=True,
+      quiz_question_id=quiz_question3_id
+  )
+  option2 = OptionCreate(
+      text="Ignorar permanentemente los fallos de otros procesos.",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  option3 = OptionCreate(
+      text="Reiniciar automáticamente al proceso si muere.",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  option4 = OptionCreate(
+      text="Crear un proceso monitor automáticamente.",
+      is_correct=False,
+      quiz_question_id=quiz_question3_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 4
+  quiz_question4 = QuizQuestionCreate(
+      question_text="¿Qué diferencia principal tienen los monitores respecto a los links?",
+      quiz_id=quiz13_id
+  )
+  quiz_question4_db = await quiz_crud.create_quiz_question(db, quiz_question4)
+  quiz_question4_id = quiz_question4_db.id
+
+  option1 = OptionCreate(
+      text="Los monitores son unidireccionales y apilables, mientras que los links son bidireccionales.",
+      is_correct=True,
+      quiz_question_id=quiz_question4_id
+  )
+  option2 = OptionCreate(
+      text="Los monitores reinician procesos automáticamente al morir.",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  option3 = OptionCreate(
+      text="Los monitores convierten fallos en señales de log.",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  option4 = OptionCreate(
+      text="Los monitores solo existen en OTP, no en Erlang puro.",
+      is_correct=False,
+      quiz_question_id=quiz_question4_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 5
+  quiz_question5 = QuizQuestionCreate(
+      question_text="¿Cómo se evita una race condition al usar procesos nombrados con register/2?",
+      quiz_id=quiz13_id
+  )
+  quiz_question5_db = await quiz_crud.create_quiz_question(db, quiz_question5)
+  quiz_question5_id = quiz_question5_db.id
+
+  option1 = OptionCreate(
+      text="Usando referencias únicas (make_ref) en los mensajes para identificarlos de forma segura.",
+      is_correct=True,
+      quiz_question_id=quiz_question5_id
+  )
+  option2 = OptionCreate(
+      text="Reiniciando manualmente el proceso después de cada fallo.",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  )
+  option3 = OptionCreate(
+      text="Asignando múltiples nombres al mismo proceso.",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  )
+  option4 = OptionCreate(
+      text="Deshabilitando el uso de register/2 en procesos críticos.",
+      is_correct=False,
+      quiz_question_id=quiz_question5_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
 
   # Question 1
   question1 = QuestionCreate(

@@ -16,7 +16,7 @@ def create_start_app_handler(
         await connect_to_db(app, settings)
         await create_tables(app)
         #await delete_entries_from_db(app)
-        await create_initial_data(app)
+        #await create_initial_data(app)
 
     return start_app
 

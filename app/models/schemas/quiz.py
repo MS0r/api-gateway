@@ -3,6 +3,7 @@ from typing import List
 from pydantic import BaseModel, field_validator
 from app.models.domain.quiz import Option, QuizQuestion
 from app.models.schemas.rwmodel import RWModel
+import random
 
 class OptionCreate(BaseModel):
     text: str
@@ -28,7 +29,9 @@ class QuizQuestionRead(RWModel):
         if v is None:
             return []
         if isinstance(v, list):
-            return [OptionRead.model_validate(option) for option in v]
+            shu = [OptionRead.model_validate(option) for option in v]
+            random.shuffle(shu)
+            return shu
         raise ValueError("Options must be a list of Option objects")
 
 class QuizCreate(BaseModel):
