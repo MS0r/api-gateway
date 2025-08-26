@@ -92,7 +92,7 @@ async def get_answer(db: AsyncSession, answer_id: int) -> Answer | None:
 
 async def get_answers_for_question(db: AsyncSession, question_id: int) -> List[Answer]:
     answers = await db.execute(
-        select(Answer).where(Answer.question_id == question_id)
+        select(Answer).where(Answer.question_id == question_id).options(selectinload(Answer.user))
     )
     return answers.scalars().all()
 

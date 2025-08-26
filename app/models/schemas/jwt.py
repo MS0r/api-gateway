@@ -7,6 +7,5 @@ class JWTMeta(BaseModel):
     exp: datetime
     sub: str
 
-
 class JWTUser(BaseModel):
     username: str

@@ -43,10 +43,12 @@ class QuizUpdate(BaseModel):
     title: str | None = None
     description: str | None = None
 
-class QuizRead(RWModel):
+class QuizCreated(RWModel):
     title: str
     description: str | None
     subunit_id: int
+
+class QuizRead(QuizCreated):
     questions: List[QuizQuestionRead] = []
 
     @field_validator('questions', mode='before')

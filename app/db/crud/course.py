@@ -8,7 +8,7 @@ from app.models.domain.user import User
 from app.models.domain.unit import Unit
 from app.models.domain.subunit import Subunit
 from app.models.domain.quiz import Quiz, QuizQuestion
-from app.models.domain.course import Course, Enrollment
+from app.models.domain.course import Course, Enrollment, EnrollmentStatus
 from app.models.schemas.course import CourseCreate, CourseUpdate
 
 async def create_course(db: AsyncSession, course_create: CourseCreate) -> Course:
@@ -33,7 +33,7 @@ async def update_course(db: AsyncSession, course_id: int, course_update: CourseU
     return course
 
 async def enroll_user_in_course(db: AsyncSession, user: User, course_id: int) -> Enrollment:
-    enrollment = Enrollment(user_id=user.id, course_id=course_id)
+    enrollment = Enrollment(user_id=user.id, course_id=course_id,status=EnrollmentStatus.ENROLLED)
     db.add(enrollment)
     await db.commit()
     await db.refresh(enrollment)
@@ -56,6 +56,7 @@ async def get_course_full(db: AsyncSession, course_id: int) -> Course:
 
 async def get_course_units(db: AsyncSession, course_id: int) -> List[Unit]:
     course = await get_course_full(db, course_id)
+    print(course.units)
     if not course:
         return []
     return course.units

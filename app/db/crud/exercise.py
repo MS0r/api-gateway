@@ -2,6 +2,7 @@ from typing import List, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from app.models.domain.exercise import Exercise
 from app.models.domain.unit import Unit
@@ -32,4 +33,4 @@ async def get_course_exercises(db: AsyncSession, course_id: int) -> List[Exercis
     exercises = await db.execute(
         select(Exercise).join(Exercise.unit).where(Unit.course_id == course_id)
     )
-    return [exercise for exercise in exercises.scalars().all()]
+    return exercises.scalars().all()

@@ -9,6 +9,7 @@ class QuestionCreateNoID(BaseModel):
     title: str
     body: str
     tags: List[str] | None = None
+    views : int = 0
 
 class QuestionCreate(QuestionCreateNoID):
     user_id: int
@@ -30,13 +31,15 @@ class AnswerRead(RWModel):
     body: str
     question_id: int
     user_id: int
-    user : str
+    user: str = "Unknown User"
 
     @field_validator("user", mode="before")
     def validate_user(cls, v: User | None) -> str:
         if v is None:
             return "Unknown User"
-        return v.username
+        if isinstance(v, str):
+            return v
+        return getattr(v, "username", "Unknown User")
 
 class QuestionRead(RWModel):
     title: str

@@ -24,15 +24,18 @@ class UserLogin(BaseModel):
     username: str
     password: str
 
-class UserRead(RWModel):
+class UserAuthRead(RWModel):
     username: str
     email: str
-    role: UserRole
     status: UserStatus
+    role : UserRole
+
+class UserWithToken(UserAuthRead):
+    token: str = None
+
+class UserRead(UserWithToken):
     quiz_passes: List[QuizPassRead] | None = None
     enrollments: List[EnrollmentRead] | None = None
     submissions: List[SubmissionRead] | None = None
 
-class UserWithToken(UserRead):
-    token: str
 

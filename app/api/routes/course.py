@@ -46,7 +46,7 @@ async def update_course_route(
 @router.post("/{course_id}/enroll", response_model=EnrollmentRead, name="course:enroll")
 async def enroll_user_in_course(
     course_id: int,
-    user: User = Depends(get_current_user_authorize()),  # Assuming you have a dependency to get the current user
+    user: User = Depends(get_current_user_authorize()),
     db: AsyncSession = Depends(get_db_session)
 ) -> EnrollmentRead:
     enrolled_course = await course_crud.enroll_user_in_course(db, user, course_id)
@@ -59,9 +59,11 @@ async def get_course_units_route(
     course_id: int,
     db: AsyncSession = Depends(get_db_session)
 ) -> List[UnitRead]:
-    course = await course_crud.get_course_units(db, course_id)
-    if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
-    
-    
-    return [UnitRead.model_validate(unit) for unit in course] if course else []
+    try:
+        units = await course_crud.get_course_units(db, course_id)
+        if units is None:
+            raise HTTPException(status_code=404, detail="Course not found")
+
+        return [UnitRead.model_validate(unit) for unit in units] if units else []
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))

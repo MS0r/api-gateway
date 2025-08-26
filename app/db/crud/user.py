@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from sqlalchemy import select
+from sqlalchemy import select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
@@ -47,6 +47,12 @@ async def get_user_by_username(db: AsyncSession, username: str) -> User | None:
 
 async def get_user_by_email(db: AsyncSession, email: str) -> User | None:
     user = await db.execute(
-        select(User).where(User.email == email)
+        select(User).where(User.email == email).options(selectinload(User.quiz_passes),selectinload(User.enrollments),selectinload(User.submissions))
     )
     return user.scalar_one_or_none() 
+
+async def get_user_by_login(db : AsyncSession, email_or_username: str) -> User | None:
+    user = await db.execute(
+        select(User).where((User.email == email_or_username) | (User.username == email_or_username))
+    )
+    return user.scalar_one_or_none()

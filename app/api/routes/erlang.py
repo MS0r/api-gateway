@@ -21,15 +21,15 @@ async def compile_erlang_code(
 async def health_check() -> dict:
     return {"status": "ok", "message": "Erlang service is running"}
 
-# @router.post("/test/{exercise_id}", response_model=ErlangTestResponse, name="erlang:test")
-# async def test_erlang_code(
-#     exercise_id: int,
-#     db : AsyncSession = Depends(get_db_session),
-#     payload: ErlangTestPayload = Body(..., embed=True, alias="erlang_payload")
-# ) -> ErlangTestResponse:
-#     try:
-#         result = await erlang_service.test_code_erlang(db, payload, exercise_id)
-#         return result
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
+@router.post("/test/{exercise_id}", response_model=ErlangTestResponse, name="erlang:test")
+async def test_erlang_code(
+    exercise_id: int,
+    db : AsyncSession = Depends(get_db_session),
+    payload: ErlangTestPayload = Body(..., embed=True, alias="erlang_payload")
+) -> ErlangTestResponse:
+    try:
+        result = await erlang_service.test_code_erlang(db, payload, exercise_id)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 

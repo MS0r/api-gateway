@@ -21,17 +21,16 @@ from app.services import user as user_service
 
 router = APIRouter()
 
-@router.get("", response_model=UserWithToken,name="user:get_current_user")
+@router.get("", response_model=UserRead,name="user:get_current_user")
 async def get_current_user(
     current_user: User = Depends(get_current_user_authorize()),
     settings: AppSettings = Depends(get_app_settings)
-) -> UserWithToken:
+) -> UserRead:
     token = jwt.create_access_token_for_user(current_user, settings.secret_key.get_secret_value())
     
-    return UserWithToken(
-        **UserRead.model_validate(current_user).model_dump(by_alias=True),
-        token=token
-    )
+    user = UserRead.model_validate(current_user)
+    setattr(user, "token", token)
+    return user
 
 @router.get("/progress/{course_id}", response_model=ProgressSchema, name="user:course_progress")
 async def get_course_progress_route(

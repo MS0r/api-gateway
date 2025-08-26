@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-
+from pathlib import Path
 from pydantic import PostgresDsn
 import pytest
 import pytest_asyncio
@@ -15,7 +15,7 @@ from app.services import jwt
 from app.models.domain.user import User, UserRole, UserStatus
 from app.models.domain.publication import Question, Answer
 
-load_dotenv()
+load_dotenv(dotenv_path=Path(__file__).parent.parent / ".env")
 
 os.environ["APP_ENV"] = "test"
 os.environ["DATABASE_URL"] = os.getenv("TEST_DATABASE_URL")
@@ -77,8 +77,8 @@ async def test_user(session: AsyncSession) -> User:
         username="testuser",
         email="testuser@example.com",
         password="password",
-            role=UserRole.USER,
-            status=UserStatus.ACTIVE
+        role=UserRole.USER,
+        status=UserStatus.ACTIVE
         )
     session.add(user)
     await session.commit()

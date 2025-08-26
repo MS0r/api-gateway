@@ -8,11 +8,13 @@ class Block(BaseModel):
     type: Literal['text','html','code']
     value: str
 
-class SubunitCreate(BaseModel):
+class SubunitCreateNoID(BaseModel):
     title: str
     description: str
     order: int | None = None
     blocks: List[Block]
+
+class SubunitCreate(SubunitCreateNoID):
     unit_id: int
 
 class SubunitUpdate(BaseModel):
@@ -21,12 +23,14 @@ class SubunitUpdate(BaseModel):
     order: int | None = None
     blocks: List[Block] | None = None
 
-class SubunitRead(RWModel):
+class SubunitCreated(RWModel):
     title: str
     description: str
     order: int | None = None
     blocks: List[Block]
     unit_id: int
+
+class SubunitRead(SubunitCreated):
     quiz : QuizRead | None = None
 
     @field_validator('quiz',mode='before')

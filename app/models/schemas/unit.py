@@ -17,6 +17,12 @@ class UnitUpdate(BaseModel):
     title: str | None = None
     description: str | None = None
 
+class SingleUnit(RWModel):
+    title: str
+    description: str
+    course_id: int
+    order: int
+
 class UnitRead(RWModel):
     title: str
     description: str

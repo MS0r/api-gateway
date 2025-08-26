@@ -81,7 +81,14 @@ async def create_answer_route(
     db: AsyncSession = Depends(get_db_session)
 ) -> AnswerRead:
     answer = await publication_crud.create_answer(db, AnswerCreate(body=body, user_id=user.id, question_id=question_id))
-    return AnswerRead.model_validate(answer)
+    return AnswerRead(
+        id=answer.id,
+        body=answer.body,
+        question_id=answer.question_id,
+        user_id=answer.user_id,
+        created_at=answer.created_at,
+        updated_at=answer.updated_at
+    )
 
 @router.get("/{question_id}/answers",response_model=List[AnswerRead], name="forum:get_answers")
 async def get_answers_route(

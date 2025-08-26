@@ -36,15 +36,15 @@ async def get_exercise_route(
     return ExerciseRead.model_validate(exercise)
 
 
-@router.get("/{exercise_id}/submissions", response_model=SubmissionRead, name="exercise:create_submission")
+@router.get("/{exercise_id}/submissions", response_model=SubmissionRead, name="exercise:get_submissions")
 async def get_submissions_route(
     exercise_id: int,
     db: AsyncSession = Depends(get_db_session)
 ) -> SubmissionRead:
-    exercise = await exercise_crud.get_exercise(db, exercise_id)
-    if not exercise.submissions:
+    submissions = await submission_crud.get_submissions_by_exercise_id(db, exercise_id)
+    if not submissions:
         raise HTTPException(status_code=404, detail="No submissions found for this exercise")
-    return [SubmissionRead.model_validate(submission) for submission in exercise.submissions]
+    return [SubmissionRead.model_validate(submission) for submission in submissions]
 
 @router.post("/{exercise_id}/submit", response_model=ErlangTestResponse, name="exercise:submit_exercise")
 async def submit_exercise_route(
