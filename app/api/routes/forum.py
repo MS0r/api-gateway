@@ -50,28 +50,20 @@ async def get_question_route(
     question_id: int,
     db: AsyncSession = Depends(get_db_session)
 ) -> QuestionReadSingle:
-    question = await publication_crud.get_question(db, question_id, False)
-    if not question:
+    try:
+        return await forum_service.get_question(db, question_id,False)
+    except Exception as e:
         raise HTTPException(status_code=404, detail="Question not found")
-    question, u, d = question
-    q = QuestionReadSingle.model_validate(question)
-    setattr(q, "upvote_count", u)
-    setattr(q, "downvote_count", d)
-    return q
-
+    
 @router.get("/questions/view/{question_id}", response_model=QuestionReadSingle, name="forum:view_question")
 async def view_question_route(
     question_id: int,
     db: AsyncSession = Depends(get_db_session)
 ) -> QuestionReadSingle:
-    question = await publication_crud.get_question(db, question_id,True)
-    if not question:
+    try:
+        return await forum_service.get_question(db, question_id,True)
+    except Exception as e:
         raise HTTPException(status_code=404, detail="Question not found")
-    question, u, d = question
-    q = QuestionReadSingle.model_validate(question)
-    setattr(q, "upvote_count", u)
-    setattr(q, "downvote_count", d)
-    return q
 
 @router.post("/questions/{question_id}",response_model=AnswerCreate, name="forum:create_answer")
 async def create_answer_route(
@@ -95,18 +87,23 @@ async def get_answers_route(
     question_id: int,
     db: AsyncSession = Depends(get_db_session)
 ) -> List[AnswerRead]:
-    answers = await publication_crud.get_answers_for_question(db, question_id)
-    return [AnswerRead.model_validate(answer) for answer in answers]
+    try:
+        answers = await publication_crud.get_answers_for_question(db, question_id)
+        return [AnswerRead.model_validate(answer) for answer in answers]
+    except Exception as e:
+        raise HTTPException(status_code=404, detail="Answers not found")
 
-@router.post("/vote/{question_id}", response_model=QuestionRead, name="forum:vote_question")
+@router.post("/vote/{question_id}", response_model=QuestionReadSingle, name="forum:vote_question")
 async def vote_question_route(
     question_id: int,
     vote : VoteType = Body(..., embed=True),
     user: User = Depends(get_current_user_authorize()),
     db: AsyncSession = Depends(get_db_session)
-) -> QuestionRead:
-    question = await forum_service.vote_publication(db, VoteCreate(user_id=user.id, question_id=question_id, vote=vote))
-    return QuestionRead.model_validate(question)
+) -> QuestionReadSingle:
+    try:
+        return await forum_service.vote_publication(db, VoteCreate(user_id=user.id, question_id=question_id, vote=vote))
+    except Exception as e:
+        raise HTTPException(status_code=403, detail="Question not found")
 
 @router.post("/vote/answer/{answer_id}", response_model=AnswerRead, name="forum:vote_answer")
 async def vote_answer_route(
@@ -115,5 +112,7 @@ async def vote_answer_route(
     user: User = Depends(get_current_user_authorize()),
     db: AsyncSession = Depends(get_db_session)
 ) -> AnswerRead:
-    answer = await forum_service.vote_publication(db, VoteCreate(user_id=user.id, answer_id=answer_id, vote=vote))
-    return AnswerRead.model_validate(answer)
+    try:
+        return await forum_service.vote_publication(db, VoteCreate(user_id=user.id, answer_id=answer_id, vote=vote))
+    except Exception as e:
+        raise HTTPException(status_code=403, detail="Answer not found")

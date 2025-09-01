@@ -14,7 +14,7 @@ async def create_question(db: AsyncSession, question_create: QuestionCreate) -> 
     await db.refresh(question)
     return question
 
-async def get_question(db: AsyncSession, question_id: int, view : bool) -> Tuple[Question, int, int] | None:
+async def get_question(db: AsyncSession, question_id: int, view : bool) ->Tuple[Tuple[Question, int, int],List[Tuple[Answer, int, int]]] | None:
     if view:
         await db.execute(
             update(Question).where(Question.id == question_id).values(views=Question.views + 1)
@@ -30,7 +30,8 @@ async def get_question(db: AsyncSession, question_id: int, view : bool) -> Tuple
         .group_by(Question.id)
         .options(selectinload(Question.user), selectinload(Question.answers).selectinload(Answer.user))
     )
-    return question.first()
+    answers = await get_answers_for_question(db, question_id)
+    return (question.first(), answers)
 
 async def get_questions_from_user(db: AsyncSession, user_id: int) -> List[Tuple[Question, int, int, int]]:
     questions = await db.execute(
@@ -86,15 +87,33 @@ async def create_answer(db: AsyncSession, answer_create: AnswerCreate) -> Answer
     await db.refresh(answer)
     return answer
 
-async def get_answer(db: AsyncSession, answer_id: int) -> Answer | None:
-    answer = await db.get(Answer, answer_id)
-    return answer if answer else None
-
-async def get_answers_for_question(db: AsyncSession, question_id: int) -> List[Answer]:
-    answers = await db.execute(
-        select(Answer).where(Answer.question_id == question_id).options(selectinload(Answer.user))
+async def get_answer(db: AsyncSession, answer_id: int) -> Tuple[Answer, int, int] | None:
+    answer = await db.execute(
+        select(
+            Answer,
+            func.count(distinct(case((Vote.vote == VoteType.UPVOTE, Vote.id)))).label("upvote_count"),
+            func.count(distinct(case((Vote.vote == VoteType.DOWNVOTE, Vote.id)))).label("downvote_count")
+        )
+        .outerjoin(Answer.votes)
+        .where(Answer.id == answer_id)
+        .group_by(Answer.id)
+        .options(selectinload(Answer.user))
     )
-    return answers.scalars().all()
+    return answer.first()
+
+async def get_answers_for_question(db: AsyncSession, question_id: int) -> List[Tuple[Answer, int, int]]:
+    answers = await db.execute(
+        select(
+            Answer,
+            func.count(distinct(case((Vote.vote == VoteType.UPVOTE, Vote.id)))).label("upvote_count"),
+            func.count(distinct(case((Vote.vote == VoteType.DOWNVOTE, Vote.id)))).label("downvote_count")
+        )
+        .outerjoin(Answer.votes)
+        .where(Answer.question_id == question_id)
+        .group_by(Answer.id)
+        .options(selectinload(Answer.user))
+    )
+    return answers.all()
 
 async def get_answers_from_user(db: AsyncSession, user_id: int) -> List[Answer]:
     answers = await db.execute(
@@ -138,8 +157,8 @@ async def remove_vote(db: AsyncSession, vote: Vote) -> None:
     await db.delete(vote)
     await db.commit()
 
-async def vote(db: AsyncSession, vote : VoteCreate) -> Vote | None:
-    vote = VoteCreate(**vote.model_dump(by_alias=True))
+async def vote(db: AsyncSession, vote_map : VoteCreate) -> Vote | None:
+    vote = Vote(**vote_map.model_dump(by_alias=True))
     db.add(vote)
     await db.commit()
     await db.refresh(vote)

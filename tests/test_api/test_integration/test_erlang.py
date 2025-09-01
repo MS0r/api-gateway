@@ -79,6 +79,7 @@ async def test_execute_runtime_error(
     assert "arithmetic" in data["reason"].lower() or "badarith" in data["reason"].lower()
 
 @pytest.mark.asyncio
+@pytest.mark.timeout(300)
 async def test_execute_timeout(
     app: FastAPI, client: AsyncClient
 ):

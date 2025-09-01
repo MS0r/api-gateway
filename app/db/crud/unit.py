@@ -1,6 +1,7 @@
 from typing import List, Union
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from app.models.domain.unit import Unit
 from app.models.domain.subunit import Subunit
@@ -29,6 +30,6 @@ async def update_unit(db: AsyncSession, unit_id: int, unit_update: UnitUpdate) -
 
 async def get_subunits_by_unit_id(db: AsyncSession, unit_id: int) -> List[Subunit | None]:
     subunits = await db.execute(
-        select(Subunit).where(Subunit.unit_id == unit_id)
+        select(Subunit).where(Subunit.unit_id == unit_id).options(selectinload(Subunit.quiz))
     )
     return [subunit for subunit in subunits.scalars().all()]

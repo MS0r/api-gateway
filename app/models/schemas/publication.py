@@ -1,8 +1,8 @@
 from pydantic import BaseModel, field_validator
 from app.models.domain.user import User
 from app.models.schemas.rwmodel import RWModel
-from app.models.domain.publication import Answer
-from typing import List
+from app.models.domain.publication import Answer, Question
+from typing import List, Tuple
 
 
 class QuestionCreateNoID(BaseModel):
@@ -31,6 +31,8 @@ class AnswerRead(RWModel):
     body: str
     question_id: int
     user_id: int
+    upvote_count: int | None = None
+    downvote_count: int | None = None
     user: str = "Unknown User"
 
     @field_validator("user", mode="before")
@@ -56,10 +58,18 @@ class QuestionReadSingle(QuestionRead):
     user : str
 
     @field_validator("answers", mode="before")
-    def validate_answer(cls, v : List[Answer]) -> List[AnswerRead] | None:
+    def validate_answer(cls, v : List[Answer] | List[Tuple[Answer, int, int]]) -> List[AnswerRead] | None:
         try:
             if not isinstance(v, list):
                 return []
+            if not isinstance(v[0],Answer):
+                answers = []
+                for answer, u, d in v:
+                    a = AnswerRead.model_validate(answer)
+                    setattr(a, "upvote_count", u)
+                    setattr(a, "downvote_count", d)
+                    answers.append(a)
+                return answers
             return [AnswerRead.model_validate(answer) for answer in v]
         except Exception:
             return []
