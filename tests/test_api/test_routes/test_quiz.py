@@ -1,62 +1,25 @@
 import pytest
 from fastapi import FastAPI
 from httpx import AsyncClient
-from starlette.status import HTTP_403_FORBIDDEN, HTTP_422_UNPROCESSABLE_ENTITY
+from starlette.status import HTTP_403_FORBIDDEN, HTTP_400_BAD_REQUEST
 
-from app.models.schemas.quiz import QuizCreate
+from app.models.domain.quiz_pass import QuizPass
+from app.models.domain.subunit import Subunit
 
 @pytest.mark.asyncio
-async def test_create_quiz_via_api_and_submit(app: FastAPI, client: AsyncClient, token: str):
-    # Ensure a quiz exists: create course -> unit -> subunit -> quiz
-    course_data = {"course": {"title": "Submit Quiz Course", "description": "Course for submit quiz test"}}
-    course_resp = await client.post(app.url_path_for("course:create"), json=course_data)
-    assert course_resp.status_code == 200
-    course_id = course_resp.json()["id"]
-
-    unit_data = {"unit": {"title": "Submit Quiz Unit", "description": "Unit for submit quiz test", "order": 1, "course_id": course_id}}
-    unit_resp = await client.post(app.url_path_for("unit:create"), json=unit_data)
-    assert unit_resp.status_code == 200
-    unit_id = unit_resp.json()["id"]
-
-    subunit_data = {
-        "subunit": {
-            "title": "Submit Quiz Subunit",
-            "description": "Subunit for submit quiz test",
-            "order": 1,
-            "blocks": [{"type": "text", "value": "test"}],
-        }
-    }
-    subunit_resp = await client.post(app.url_path_for("unit:create_subunit",unit_id=unit_id), json=subunit_data)
-    assert subunit_resp.status_code == 200
-    subunit_id = subunit_resp.json()["id"]
-    
-    quiz_payload = {"quiz": {"title": "Submit API Quiz", "description": "Created for submit test", "subunit_id": subunit_id}}
+async def test_create_quiz_via_api_and_submit(app: FastAPI, client: AsyncClient, test_subunit : Subunit, token : str):    
+    quiz_payload = {"quiz": {"title": "Submit API Quiz", "description": "Created for submit test", "subunit_id": test_subunit.id}}
     create_resp = await client.post(app.url_path_for("quiz:create_quiz"), json=quiz_payload)
     # Accept creation or validation/other acceptable responses
-    assert create_resp.status_code in (200, 201, 400, HTTP_422_UNPROCESSABLE_ENTITY, 404)
-    quiz_id = None
-    if create_resp.status_code in (200, 201):
-        try:
-            data = create_resp.json()
-            if isinstance(data, dict) and "id" in data:
-                quiz_id = data["id"]
-            elif isinstance(data, list):
-                found = next((item for item in data if item.get("title") == "Submit API Quiz" or item.get("title") == "API Quiz"), None)
-                if found and "id" in found:
-                    quiz_id = found["id"]
-        except Exception:
-            quiz_id = None
-
-    # Fallback to a sensible default if creation didn't return id
-    if not quiz_id:
-        quiz_id = 1
+    assert create_resp.status_code == 200
+    response = create_resp.json()
+    quiz_id = response["id"]
 
     # Now submit the quiz pass
     resp = await client.post(app.url_path_for("quiz:submit", quiz_id=quiz_id), headers={"Authorization": f"Token {token}"})
-    assert resp.status_code in (200, 404, 400)
-    if resp.status_code == 200:
-        data = resp.json()
-        assert "user_id" in data and "quiz_id" in data
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "user_id" in data and "quiz_id" in data
 
 @pytest.mark.asyncio
 async def test_submit_quiz_unauthorized(app: FastAPI, client: AsyncClient):
@@ -64,11 +27,30 @@ async def test_submit_quiz_unauthorized(app: FastAPI, client: AsyncClient):
     assert resp.status_code == HTTP_403_FORBIDDEN
 
 @pytest.mark.asyncio
-async def test_get_quiz_passes_list(app: FastAPI, client: AsyncClient, token: str):
+async def test_get_quiz_passes_list(app: FastAPI, client: AsyncClient, test_quiz_pass: QuizPass, token: str):
     # Endpoint named "quiz:get_quiz_passes" may return quiz passes or require different params.
     resp = await client.get(app.url_path_for("quiz:get_quiz_passes"), headers={"Authorization": f"Token {token}"})
     # Accept list or validation error / empty results
-    assert resp.status_code in (200, HTTP_422_UNPROCESSABLE_ENTITY, 404)
-    if resp.status_code == 200:
-        data = resp.json()
-        assert isinstance(data, list)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert isinstance(data, list)
+    assert any(quiz_p["id"] == test_quiz_pass.id for quiz_p in data)
+
+@pytest.mark.asyncio
+async def test_create_quiz_failure(app: FastAPI, client: AsyncClient, mocker):
+    # Mock quiz creation to fail
+    mocker.patch("app.db.crud.quiz.create_quiz", return_value=None)
+    resp = await client.post(app.url_path_for("quiz:create_quiz"), json={"quiz": {"title": "Fail Quiz", "description" : "", "subunit_id" : 1 }})
+    assert resp.status_code == HTTP_400_BAD_REQUEST
+    assert "Failed to create quiz" in resp.json()["errors"] 
+
+@pytest.mark.asyncio
+async def test_submit_quiz_failure(app: FastAPI, client: AsyncClient, token: str, mocker):
+    # Mock no existing quiz pass and creation failure
+    mocker.patch("app.db.crud.quiz_pass.get_quiz_passes_by_user_quiz", return_value=None)
+    mocker.patch("app.db.crud.quiz_pass.create_quiz_pass", return_value=None)
+
+    headers = {"Authorization": f"Token {token}"}
+    resp = await client.post(app.url_path_for("quiz:submit", quiz_id=1), headers=headers)
+    assert resp.status_code == HTTP_400_BAD_REQUEST
+    assert "Failed to submit quiz" in resp.json()["errors"]

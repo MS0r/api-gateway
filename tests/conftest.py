@@ -12,13 +12,14 @@ from fastapi import FastAPI
 from httpx import AsyncClient, ASGITransport
 from app.services import jwt
 
-from app.models.domain.user import User, UserRole, UserStatus
-from app.models.domain.publication import Question, Answer
+# This module initializes the domain models for the application.
+from app.models.domain import course, exercise, publication, quiz, quiz_pass, submission, subunit, unit, user, vote
 
 load_dotenv(dotenv_path=Path(__file__).parent.parent / ".env")
 
 os.environ["APP_ENV"] = "test"
 os.environ["DATABASE_URL"] = os.getenv("TEST_DATABASE_URL")
+
 
 @pytest.fixture
 def app() -> FastAPI:
@@ -70,24 +71,126 @@ def authorization_prefix() -> str:
 
     return jwt_token_secret
 
-
 @pytest_asyncio.fixture
-async def test_user(session: AsyncSession) -> User:
-    user = User(
+async def test_user(session: AsyncSession) -> user.User:
+    user_created = user.User(
         username="testuser",
         email="testuser@example.com",
         password="password",
-        role=UserRole.USER,
-        status=UserStatus.ACTIVE
+        role=user.UserRole.USER,
+        status=user.UserStatus.ACTIVE
         )
-    session.add(user)
+    session.add(user_created)
     await session.commit()
-    await session.refresh(user)
-    return user
+    await session.refresh(user_created)
+    return user_created
 
 @pytest_asyncio.fixture
-async def test_question(session: AsyncSession, test_user: User) -> Question:
-    question = Question(
+async def test_course(session: AsyncSession) -> course.Course:
+    course_created = course.Course(
+        title="Test Course 1",
+        description="This is a test course."
+    )
+    session.add(course_created)
+    await session.commit()
+    await session.refresh(course_created)
+    return course_created
+
+@pytest_asyncio.fixture
+async def test_unit(session: AsyncSession, test_course: course.Course) -> unit.Unit:
+    unit_created = unit.Unit(
+        title="Test Unit 1",
+        description="This is a test unit.",
+        order=1,
+        course_id=test_course.id
+    )
+    session.add(unit_created)
+    await session.commit()
+    await session.refresh(unit_created)
+    return unit_created
+
+@pytest_asyncio.fixture
+async def test_subunit(session: AsyncSession, test_unit: unit.Unit) -> subunit.Subunit:
+    subunit_created = subunit.Subunit(
+        title="Test Subunit 1",
+        description="This is a test subunit.",
+        order=1,
+        blocks=[{"type" : "text", "value": "hola"}],
+        unit_id=test_unit.id
+    )
+    session.add(subunit_created)
+    await session.commit()
+    await session.refresh(subunit_created)
+    return subunit_created
+
+@pytest_asyncio.fixture
+async def test_quiz(session: AsyncSession, test_subunit: subunit.Subunit) -> quiz.Quiz:
+    quiz_created = quiz.Quiz(
+        title="Test Quiz 1",
+        description="This is a test quiz.",
+        subunit_id=test_subunit.id
+    )
+    session.add(quiz_created)
+    await session.commit()
+    await session.refresh(quiz_created)
+    quiz_question = quiz.QuizQuestion(
+        question_text="What is the capital of France?",
+        quiz_id=quiz_created.id
+    )
+    session.add(quiz_question)
+    await session.commit()
+    await session.refresh(quiz_question)
+    option = quiz.Option(
+        text="Paris",
+        is_correct=True,
+        quiz_question_id=quiz_question.id
+    )
+    session.add(option)
+    await session.commit()
+    await session.refresh(quiz_created)
+    return quiz_created
+    
+@pytest_asyncio.fixture
+async def test_quiz_pass(session: AsyncSession, test_user: user.User, test_quiz: quiz.Quiz) -> quiz_pass.QuizPass:
+    quiz_pass_created = quiz_pass.QuizPass(
+        user_id=test_user.id,
+        quiz_id=test_quiz.id
+    )
+    session.add(quiz_pass_created)
+    await session.commit()
+    await session.refresh(quiz_pass_created)
+    return quiz_pass_created
+
+@pytest_asyncio.fixture
+async def test_exercise(session: AsyncSession, test_unit: unit.Unit) -> exercise.Exercise:
+    exercise_created = exercise.Exercise(
+        title="Test Exercise 1",
+        description="This is a test exercise.",
+        exercise_schema="",
+        test_cases="""defmodule Test do use ExUnit.Case
+test "sum" do assert :test.sum(1,1) == 2 end end""",
+        unit_id=test_unit.id
+    )
+    session.add(exercise_created)
+    await session.commit()
+    await session.refresh(exercise_created)
+    return exercise_created
+
+@pytest_asyncio.fixture
+async def test_submission(session: AsyncSession, test_exercise: exercise.Exercise, test_user: user.User) -> submission.Submission:
+    submission_created = submission.Submission(
+        exercise_id=test_exercise.id,
+        user_id=test_user.id,
+        code_snippet="-module(test). -export([sum/2]). sum(A, B) -> A + B."
+    )
+    session.add(submission_created)
+    await session.commit()
+    await session.refresh(submission_created)
+    return submission_created
+
+@pytest_asyncio.fixture
+async def test_question(session: AsyncSession, test_user: user.User) -> publication.Question:
+    question = publication.Question(
             title="Test Question 1",
             body="This is a test question.",
             tags=["erlang"],
@@ -99,7 +202,68 @@ async def test_question(session: AsyncSession, test_user: User) -> Question:
     return question
 
 @pytest_asyncio.fixture
-async def token(test_user: User) -> str:
+async def test_answer(session: AsyncSession, test_user: user.User, test_question: publication.Question) -> publication.Answer:
+    answer_created = publication.Answer(
+        body="Response",
+        user_id=test_user.id,
+        question_id=test_question.id
+    )
+    session.add(answer_created)
+    await session.commit()
+    await session.refresh(answer_created)
+    return answer_created
+
+# Vote fixtures
+@pytest_asyncio.fixture
+async def question_upvote(session: AsyncSession, test_user: user.User, test_question: publication.Question) -> vote.Vote:
+    vote_created = vote.Vote(
+        user_id=test_user.id,
+        question_id=test_question.id,
+        vote=vote.VoteType.UPVOTE
+    )
+    session.add(vote_created)
+    await session.commit()
+    await session.refresh(vote_created)
+    return vote_created
+
+@pytest_asyncio.fixture
+async def question_downvote(session: AsyncSession, test_user: user.User, test_question: publication.Question) -> vote.Vote:
+    vote_created = vote.Vote(
+        user_id=test_user.id,
+        question_id=test_question.id,
+        vote=vote.VoteType.DOWNVOTE
+    )
+    session.add(vote_created)
+    await session.commit()
+    await session.refresh(vote_created)
+    return vote_created
+
+@pytest_asyncio.fixture
+async def answer_upvote(session: AsyncSession, test_user: user.User, test_answer: publication.Answer) -> vote.Vote:
+    vote_created = vote.Vote(
+        user_id=test_user.id,
+        answer_id=test_answer.id,
+        vote=vote.VoteType.UPVOTE
+    )
+    session.add(vote_created)
+    await session.commit()
+    await session.refresh(vote_created)
+    return vote_created
+
+@pytest_asyncio.fixture
+async def answer_downvote(session: AsyncSession, test_user: user.User, test_answer: publication.Answer) -> vote.Vote:
+    vote_created = vote.Vote(
+        user_id=test_user.id,
+        answer_id=test_answer.id,
+        vote=vote.VoteType.DOWNVOTE
+    )
+    session.add(vote_created)
+    await session.commit()
+    await session.refresh(vote_created)
+    return vote_created
+
+@pytest_asyncio.fixture
+async def token(test_user: user.User) -> str:
     return jwt.create_access_token_for_user(test_user, os.environ["SECRET_KEY"])
 
 @pytest.fixture

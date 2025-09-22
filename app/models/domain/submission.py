@@ -1,6 +1,5 @@
-import enum
 from app.models.common import DateTimeMixin, IDMixin, Base
-from sqlalchemy import Column, String, Enum, Integer, ForeignKey
+from sqlalchemy import Column, String, Enum, Integer, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 class Submission(DateTimeMixin, IDMixin, Base):
@@ -12,3 +11,7 @@ class Submission(DateTimeMixin, IDMixin, Base):
 
     user = relationship("User", back_populates="submissions")
     exercise = relationship("Exercise", back_populates="submissions")
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "exercise_id", name="uix_user_exercise"),
+    )

@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import APIRouter, Body, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.dependencies.auth import get_current_user_authorize
@@ -36,11 +37,11 @@ async def get_exercise_route(
     return ExerciseRead.model_validate(exercise)
 
 
-@router.get("/{exercise_id}/submissions", response_model=SubmissionRead, name="exercise:get_submissions")
+@router.get("/{exercise_id}/submissions", response_model=List[SubmissionRead], name="exercise:get_submissions")
 async def get_submissions_route(
     exercise_id: int,
     db: AsyncSession = Depends(get_db_session)
-) -> SubmissionRead:
+) -> List[SubmissionRead]:
     submissions = await submission_crud.get_submissions_by_exercise_id(db, exercise_id)
     if not submissions:
         raise HTTPException(status_code=404, detail="No submissions found for this exercise")

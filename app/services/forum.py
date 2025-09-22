@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -7,14 +8,28 @@ from app.models.domain.vote import Vote, VoteType
 from app.models.schemas.publication import QuestionRead, QuestionCreateNoID, AnswerRead, QuestionReadSingle
 from app.models.schemas.vote import VoteCreate, VoteUpdate
 
+async def get_answers_by_question(
+    db: AsyncSession,
+    question_id : int
+) -> List[AnswerRead]:
+    answers = await publication_crud.get_answers_for_question(db, question_id)
+    ans = []
+    for answer, u, d in answers:
+        a = AnswerRead.model_validate(answer)
+        setattr(a, "upvote_count", u)
+        setattr(a, "downvote_count", d)
+        ans.append(a)
+    return ans
+
 async def get_question(
     db: AsyncSession,
     question_id : int,
     view : bool
 ) -> QuestionReadSingle:
-    question, answers = await publication_crud.get_question(db, question_id,view)
+    question= await publication_crud.get_question(db, question_id,view)
     if not question:
         raise HTTPException(status_code=404, detail="Question not found")
+    answers = await get_answers_by_question(db, question_id)
     question, u, d = question
     q = QuestionRead.model_validate(question)
     setattr(q, "upvote_count", u)
@@ -29,10 +44,10 @@ async def vote_publication(
     existing_vote = None
     if vote.question_id:
         # Check if the user has already voted
-        existing_vote = await publication_crud.get_vote_question(db, vote.user_id, vote.question_id)
+        existing_vote = await publication_crud.get_vote_question(db, vote.question_id, vote.user_id)
     elif vote.answer_id:
         # Check if the user has already voted
-        existing_vote = await publication_crud.get_vote_answer(db, vote.user_id, vote.answer_id)
+        existing_vote = await publication_crud.get_vote_answer(db, vote.answer_id, vote.user_id)
     if existing_vote:
         if existing_vote.vote == vote.vote:
             # Remove the existing vote

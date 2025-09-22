@@ -28,3 +28,8 @@ alembic==1.16.4
 Mako==1.3.10
 MarkupSafe==3.0.2
 pytest-timeout==2.4.0
+coverage==7.10.6
+pytest-cov==6.2.1
+pytest-mock==3.14.1
+gevent==25.8.2
+zope.event==5.1.1

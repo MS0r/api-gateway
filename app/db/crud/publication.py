@@ -14,7 +14,7 @@ async def create_question(db: AsyncSession, question_create: QuestionCreate) -> 
     await db.refresh(question)
     return question
 
-async def get_question(db: AsyncSession, question_id: int, view : bool) ->Tuple[Tuple[Question, int, int],List[Tuple[Answer, int, int]]] | None:
+async def get_question(db: AsyncSession, question_id: int, view : bool) -> Tuple[Question, int, int] | None:
     if view:
         await db.execute(
             update(Question).where(Question.id == question_id).values(views=Question.views + 1)
@@ -30,8 +30,7 @@ async def get_question(db: AsyncSession, question_id: int, view : bool) ->Tuple[
         .group_by(Question.id)
         .options(selectinload(Question.user), selectinload(Question.answers).selectinload(Answer.user))
     )
-    answers = await get_answers_for_question(db, question_id)
-    return (question.first(), answers)
+    return question.first()
 
 async def get_questions_from_user(db: AsyncSession, user_id: int) -> List[Tuple[Question, int, int, int]]:
     questions = await db.execute(
@@ -156,6 +155,15 @@ async def update_vote(db: AsyncSession,vote_id : int, vote: VoteUpdate) -> Vote:
 async def remove_vote(db: AsyncSession, vote: Vote) -> None:
     await db.delete(vote)
     await db.commit()
+
+async def get_all_votes_in_question(db : AsyncSession, question_id : int, user_id : int) -> List[Vote]:
+    question_votes = await db.execute(
+        select(Vote).where(Vote.question_id == question_id, Vote.user_id == user_id)
+    )
+    answers_votes = await db.execute(
+        select(Vote).join(Answer, Vote.answer_id == Answer.id).where(Answer.question_id == question_id, Vote.user_id == user_id)
+    )
+    return question_votes.scalars().all() + answers_votes.scalars().all()
 
 async def vote(db: AsyncSession, vote_map : VoteCreate) -> Vote | None:
     vote = Vote(**vote_map.model_dump(by_alias=True))

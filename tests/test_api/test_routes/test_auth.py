@@ -5,6 +5,7 @@ from starlette.status import HTTP_403_FORBIDDEN, HTTP_409_CONFLICT, HTTP_400_BAD
 
 from app.models.domain.user import User
 from app.services.jwt import create_access_token_for_user
+from sqlalchemy.exc import IntegrityError
 
 @pytest.mark.asyncio
 async def test_unable_to_login_with_wrong_jwt_prefix(
@@ -98,3 +99,25 @@ async def test_login_user_not_found(app: FastAPI, client: AsyncClient):
         json={"user": {"username": "nouser", "password": "password123"}},
     )
     assert response.status_code == HTTP_401_UNAUTHORIZED
+
+@pytest.mark.asyncio
+async def test_register_user_create_returns_none(app: FastAPI, client: AsyncClient, mocker):
+    mocker.patch("app.db.crud.user.create_user", return_value=None)
+
+    response = await client.post(
+        app.url_path_for("user:register"),
+        json={"user": {"username": "anyuser", "email": "any@email.com", "password": "password"}},
+    )
+    assert response.status_code == 400
+
+@pytest.mark.asyncio
+async def test_register_user_integrity_error(app: FastAPI, client: AsyncClient, mocker):
+    mocker.patch(
+        "app.db.crud.user.create_user", side_effect=IntegrityError("msg", "params", "orig")
+    )
+
+    response = await client.post(
+        app.url_path_for("user:register"),
+        json={"user": {"username": "anyuser", "email": "any@email.com", "password": "password"}},
+    )
+    assert response.status_code == 409

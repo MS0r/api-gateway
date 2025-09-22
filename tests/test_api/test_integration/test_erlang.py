@@ -2,9 +2,7 @@ import pytest
 from fastapi import FastAPI
 from httpx import AsyncClient
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_422_UNPROCESSABLE_ENTITY, HTTP_500_INTERNAL_SERVER_ERROR
-
-from app.models.domain.user import User
-from app.services.jwt import create_access_token_for_user
+from app.models.domain.exercise import Exercise
 
 @pytest.mark.asyncio
 async def test_execute_valid_erlang_code(
@@ -28,6 +26,17 @@ async def test_execute_valid_erlang_code(
     assert data["status"] == "ok"
     assert "Hello, world!" in data["result"]
     assert data["reason"] is None
+
+@pytest.mark.asyncio
+async def test_execute_erlang_code_fail(app: FastAPI, client: AsyncClient, mocker):
+    mocker.patch("app.services.erlang.compile_erlang_code", side_effect=Exception("Test failed"))
+
+    resp = await client.post(
+        app.url_path_for("erlang:compile"),
+        json={"erlang_payload" : {"op" : "", "code" : ""}}
+    )
+
+    assert resp.status_code == 500
 
 @pytest.mark.asyncio
 async def test_execute_syntax_error(
@@ -166,43 +175,26 @@ async def test_compile_missing_payload_returns_422(app: FastAPI, client: AsyncCl
     assert resp.status_code in (HTTP_422_UNPROCESSABLE_ENTITY, 400)
 
 @pytest.mark.asyncio
-async def test_erlang_test_endpoint_with_exercise(app: FastAPI, client: AsyncClient):
-    """
-    Call the erlang test endpoint which runs test cases for an exercise.
-    Provide `cases` as an Elixir ExUnit module source string.
-    Accept 200 with expected structure or common error codes if exercise missing.
-    """
-    sample_code = """
-    -module(testrun).
-    -export([run/0]).
+async def test_erlang_test_endpoint_with_exercise(app: FastAPI, client: AsyncClient, test_exercise : Exercise):
+    sample_code = """-module(test). -export([sum/2]). sum(A, B) -> A + B."""
 
-    run() ->
-        io:format("test-run~n"),
-        ok.
-    """
+    resp = await client.post(
+        app.url_path_for("erlang:test", exercise_id=test_exercise.id),
+        json={"source_code": sample_code}
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "status" in data
+    assert data["status"] in ("ok", "error")
+    assert ("result" in data) or ("cases" in data) or ("test_results" in data)
 
-    exunit_module = """
-    defmodule SampleExUnit do
-      use ExUnit.Case
-
-      test "simple arithmetic" do
-        assert 1 + 1 == 2
-      end
-
-      test "string contains" do
-        assert String.contains?("hello world", "hello")
-      end
-    end
-    """
+@pytest.mark.asyncio
+async def test_erlang_test_endpoint_with_exercise_fail(app: FastAPI, client: AsyncClient, mocker):
+    mocker.patch("app.services.erlang.test_code_erlang", side_effect=Exception("Test failed"))
 
     resp = await client.post(
         app.url_path_for("erlang:test", exercise_id=1),
-        json={"erlang_payload": {"code": sample_code, "cases": exunit_module}}
+        json={"source_code" : ""}
     )
-    assert resp.status_code in (200, 404, HTTP_500_INTERNAL_SERVER_ERROR)
-    if resp.status_code == 200:
-        data = resp.json()
-        # test endpoint should return status and results/test_cases
-        assert "status" in data
-        assert data["status"] in ("ok", "error")
-        assert ("result" in data) or ("cases" in data) or ("test_results" in data)
+
+    assert resp.status_code == 500

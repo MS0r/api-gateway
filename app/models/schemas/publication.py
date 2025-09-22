@@ -62,14 +62,6 @@ class QuestionReadSingle(QuestionRead):
         try:
             if not isinstance(v, list):
                 return []
-            if not isinstance(v[0],Answer):
-                answers = []
-                for answer, u, d in v:
-                    a = AnswerRead.model_validate(answer)
-                    setattr(a, "upvote_count", u)
-                    setattr(a, "downvote_count", d)
-                    answers.append(a)
-                return answers
             return [AnswerRead.model_validate(answer) for answer in v]
         except Exception:
             return []

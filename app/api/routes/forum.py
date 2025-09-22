@@ -11,7 +11,7 @@ from app.models.domain.publication import Question, Answer
 from app.models.domain.vote import VoteType
 from app.models.domain.user import User
 from app.models.schemas.publication import QuestionCreate, QuestionRead, AnswerCreate, AnswerRead, QuestionCreateNoID, QuestionReadSingle
-from app.models.schemas.vote import VoteCreate
+from app.models.schemas.vote import VoteCreate, VoteRead
 
 from app.db.crud import publication as publication_crud
 from app.services import forum as forum_service
@@ -65,7 +65,7 @@ async def view_question_route(
     except Exception as e:
         raise HTTPException(status_code=404, detail="Question not found")
 
-@router.post("/questions/{question_id}",response_model=AnswerCreate, name="forum:create_answer")
+@router.post("/questions/{question_id}",response_model=AnswerRead, name="forum:create_answer")
 async def create_answer_route(
     question_id: int,
     body: str = Body(..., embed=True),
@@ -75,6 +75,7 @@ async def create_answer_route(
     answer = await publication_crud.create_answer(db, AnswerCreate(body=body, user_id=user.id, question_id=question_id))
     return AnswerRead(
         id=answer.id,
+        user=user.username,
         body=answer.body,
         question_id=answer.question_id,
         user_id=answer.user_id,
@@ -88,8 +89,8 @@ async def get_answers_route(
     db: AsyncSession = Depends(get_db_session)
 ) -> List[AnswerRead]:
     try:
-        answers = await publication_crud.get_answers_for_question(db, question_id)
-        return [AnswerRead.model_validate(answer) for answer in answers]
+        answers = await forum_service.get_answers_by_question(db, question_id)
+        return answers
     except Exception as e:
         raise HTTPException(status_code=404, detail="Answers not found")
 
@@ -116,3 +117,15 @@ async def vote_answer_route(
         return await forum_service.vote_publication(db, VoteCreate(user_id=user.id, answer_id=answer_id, vote=vote))
     except Exception as e:
         raise HTTPException(status_code=403, detail="Answer not found")
+
+@router.get("/vote/{question_id}", response_model=List[VoteRead], name="forum:get_votes_for_question")
+async def get_votes_for_question_route(
+    question_id: int,
+    user: User = Depends(get_current_user_authorize()),
+    db: AsyncSession = Depends(get_db_session)
+) -> List[VoteRead]:
+    try:
+        votes = await publication_crud.get_all_votes_in_question(db, question_id, user.id)
+        return [VoteRead.model_validate(vote) for vote in votes]
+    except Exception as e:
+        raise HTTPException(status_code=403, detail="Votes not found")

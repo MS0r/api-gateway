@@ -25,10 +25,10 @@ async def health_check() -> dict:
 async def test_erlang_code(
     exercise_id: int,
     db : AsyncSession = Depends(get_db_session),
-    payload: ErlangTestPayload = Body(..., embed=True, alias="erlang_payload")
+    source_code: str = Body(..., embed=True)
 ) -> ErlangTestResponse:
     try:
-        result = await erlang_service.test_code_erlang(db, payload, exercise_id)
+        result = await erlang_service.test_code_erlang(db, source_code, exercise_id)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
