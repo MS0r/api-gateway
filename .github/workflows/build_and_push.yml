@@ -69,21 +69,11 @@ jobs:
           
       - name: Run unit and integration Tests
         run: |
-          coverage run -m pytest --maxfail=1 --disable-warnings -q
-          coverage report -m
-          coverage xml
+          pytest --maxfail=1 --disable-warnings -q
         env:
           APP_ENV: test
           DATABASE_URL: postgresql+asyncpg://user:123@db/mydb
           SECRET_KEY: 123
-          
-      - name: Upload coverage to Codecov
-        if: success()
-        uses: codecov/codecov-action@v3
-        with:
-          files: ./coverage.xml
-          flags: unittests
-          fail_ci_if_error: true
 
   build_and_push:
     name: Build and Push Docker Image
