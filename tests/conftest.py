@@ -10,21 +10,16 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from fastapi import FastAPI
 from httpx import AsyncClient, ASGITransport
+from app.core.config import get_app_settings
 from app.services import jwt
 
 # This module initializes the domain models for the application.
 from app.models.domain import course, exercise, publication, quiz, quiz_pass, submission, subunit, unit, user, vote
 
-load_dotenv(dotenv_path=Path(__file__).parent.parent / ".env")
-
-os.environ["APP_ENV"] = "test"
-os.environ["DATABASE_URL"] = os.getenv("TEST_DATABASE_URL")
-
-
 @pytest.fixture
 def app() -> FastAPI:
     from app.main import get_application
-
+    
     return get_application()
 
 @pytest_asyncio.fixture
@@ -264,7 +259,9 @@ async def answer_downvote(session: AsyncSession, test_user: user.User, test_answ
 
 @pytest_asyncio.fixture
 async def token(test_user: user.User) -> str:
-    return jwt.create_access_token_for_user(test_user, os.environ["SECRET_KEY"])
+    from app.core.config import get_app_settings
+    settings = get_app_settings()
+    return jwt.create_access_token_for_user(test_user, settings.secret_key.get_secret_value())
 
 @pytest.fixture
 def authorized_client(client: AsyncClient, authorization_prefix: str, token: str) -> AsyncClient:

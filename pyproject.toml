@@ -82,3 +82,8 @@ exclude = ["alembic*"]
 
 [tool.coverage.run]
 concurrency = ["gevent"]
+
+[tool.pytest.ini_options]
+env = [
+  "APP_ENV=test",
+]

@@ -5,7 +5,7 @@ iniconfig==2.1.0
 packaging==25.0
 pluggy==1.6.0
 Pygments==2.19.2
-pytest==8.4.1
+pytest==8.4.2
 asgi-lifespan==2.1.0
 pytest-asyncio==1.1.0
 tornado==6.5.1
@@ -33,3 +33,4 @@ pytest-cov==6.2.1
 pytest-mock==3.14.1
 gevent==25.8.2
 zope.event==5.1.1
+pytest-env==1.2.0
