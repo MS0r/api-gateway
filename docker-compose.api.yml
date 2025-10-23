@@ -25,9 +25,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
   sandbox:
-    build:
-      context: ../sandbox
-      dockerfile: Dockerfile.server
+    image: mickael279/sandbox-erlang:latest
     cpus: 0.5
     mem_limit: 256m
     pids_limit: 100

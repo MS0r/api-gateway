@@ -245,3 +245,23 @@ async def test_vote_answer_forbidden(app: FastAPI, client: AsyncClient, token: s
                              json={"vote": "downvote"}, headers=headers)
     assert resp.status_code == HTTP_403_FORBIDDEN
     assert "Answer not found" in resp.json()["errors"]
+
+@pytest.mark.asyncio
+async def test_votes_for_question(app : FastAPI, client : AsyncClient, token : str, question_upvote : Vote):
+    headers = {"Authorization" : f"Token {token}"}
+    resp = await client.get(app.url_path_for("forum:get_votes_for_question", question_id=question_upvote.question_id),
+                            headers=headers)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert isinstance(data, list)
+    assert any(vote["id"] == question_upvote.id for vote in data)
+    assert any(vote["vote"] == question_upvote.vote.value for vote in data)
+
+@pytest.mark.asyncio
+async def test_votes_for_question_fail(app : FastAPI, client : AsyncClient, token : str, mocker):
+    headers = {"Authorization" : f"Token {token}"}
+    mocker.patch("app.db.crud.publication.get_all_votes_in_question", side_effect=Exception("Fail"))
+    resp = await client.get(app.url_path_for("forum:get_votes_for_question", question_id=1),
+                            headers=headers)
+    assert resp.status_code == 403
+    assert "Votes not found" in resp.json()["errors"]
