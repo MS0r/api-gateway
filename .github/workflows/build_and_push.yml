@@ -56,12 +56,17 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
+            
+      - name: Install PostgreSQL client
+        run: apt-get update && apt-get install -y postgresql-client
+        
       - name: Wait for Postgres to be ready
         run: |
-          until pg_isready -h localhost -p 5432 -U user; do
+          until pg_isready -h db -p 5432 -U user; do
             echo "Waiting for Postgres..."
             sleep 2
           done
+          
       - name: Run unit and integration Tests
         run: |
           coverage run -m pytest --maxfail=1 --disable-warnings -q
@@ -71,6 +76,7 @@ jobs:
           APP_ENV: test
           DATABASE_URL: postgresql+asyncpg://user:123@db/mydb
           SECRET_KEY: 123
+          
       - name: Upload coverage to Codecov
         if: success()
         uses: codecov/codecov-action@v3
