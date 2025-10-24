@@ -94,11 +94,11 @@ jobs:
         with:
           push: true
           tags: 
-            ${{ vars.DOCKERHUB_USERNAME }}/api-gateway-erlang:latest
-            ${{ vars.DOCKERHUB_USERNAME }}/api-gateway-erlang:${{ github.sha }}
-          labels: |
-            org.opencontainers.image.source=${{ github.repository }}
-            org.opencontainers.image.revision=${{ github.sha }}
+            - ${{ vars.DOCKERHUB_USERNAME }}/api-gateway-erlang:latest
+            - ${{ vars.DOCKERHUB_USERNAME }}/api-gateway-erlang:${{ github.sha }}
+          labels:
+            - org.opencontainers.image.source=${{ github.repository }}
+            - org.opencontainers.image.revision=${{ github.sha }}
           file: Dockerfile.server
           cache-from: type=gha
           cache-to: type=gha,mode=max
