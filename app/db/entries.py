@@ -23,7 +23,7 @@ from app.db.crud import vote as vote_crud
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
-async def create_initial_data(db : AsyncSession) -> None:
+async def create_initial_data_total(db : AsyncSession) -> None:
   """Create initial data in the database."""
   user1 = UserCreate(
       username="user1",
@@ -5470,3 +5470,319 @@ end
   )
   await vote_crud.create_vote(db, vote3b)
 
+async def create_initial_data_test(db : AsyncSession) -> None:
+
+  user1 = UserCreate(
+      username="user1",
+      email="user1@example.com",
+      password="password1"
+  )
+
+  try:
+    await user_crud.create_user(db, user1)
+  except IntegrityError:
+    await db.rollback()
+    pass
+
+  course = CourseCreate(
+    title="Tutorial de Erlang",
+    description="Este es el tutorial de Erlang",
+    )
+  
+  course_id = await course_crud.get_course(db, 1)
+  if not course_id:
+      course_db = await course_crud.create_course(db, course)
+      course_id = course_db.id
+  else:
+      course_id = course_id.id
+
+  unit1 = UnitCreate(
+    title="Unidad 1: Fundamentos de Erlang y Pensamiento Funcional",
+    description="This is the first unit of the course.",
+    order=1,
+    course_id=course_id
+  )
+
+  unit1_db = await unit_crud.create_unit(db, unit1)
+  unit1_id = unit1_db.id
+  
+  subunit1_1 = SubunitCreate(
+    title="Introducción",
+    description="This is the first subunit of unit 1.",
+    order=1,
+    blocks=[
+      { "type": "text", "value": "" },
+    ],
+    unit_id=unit1_id
+  )
+
+  subunit1_1_db = await subunit_crud.create_subunit(db, subunit1_1)
+
+  exercise1 = ExerciseCreate(
+    title="Ejercicio 1",
+    description="",
+    exercise_schema="",
+    test_cases="",
+    unit_id=unit1_id
+  )
+
+  await exercise_crud.create_exercise(db, exercise1)
+
+  quiz1 = QuizCreate(
+    title="Quiz Erlang: Introducción y Sintaxis",
+    description="Quiz sobre los conceptos fundamentales de Erlang, su sintaxis y características.",
+    subunit_id=subunit1_1_db.id
+  )
+  quiz1_db = await quiz_crud.create_quiz(db, quiz1)
+  quiz1_id = quiz1_db.id
+
+  # Pregunta 1
+  quiz_question1 = QuizQuestionCreate(
+    question_text="¿Qué es Erlang?",
+    quiz_id=quiz1_id
+  )
+  quiz_question1_db = await quiz_crud.create_quiz_question(db, quiz_question1)
+  quiz_question1_id = quiz_question1_db.id
+
+  option1 = OptionCreate(
+    text="Un lenguaje de programación de propósito general, concurrente y funcional.",
+    is_correct=True,
+    quiz_question_id=quiz_question1_id
+  )
+  option2 = OptionCreate(
+    text="Una base de datos relacional.",
+    is_correct=False,
+    quiz_question_id=quiz_question1_id
+  )
+  option3 = OptionCreate(
+    text="Un sistema operativo.",
+    is_correct=False,
+    quiz_question_id=quiz_question1_id
+  )
+  option4 = OptionCreate(
+    text="Un lenguaje orientado a objetos.",
+    is_correct=False,
+    quiz_question_id=quiz_question1_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 2
+  quiz_question2 = QuizQuestionCreate(
+    question_text="¿Cuál es la filosofía de manejo de errores de Erlang?",
+    quiz_id=quiz1_id
+  )
+  quiz_question2_db = await quiz_crud.create_quiz_question(db, quiz_question2)
+  quiz_question2_id = quiz_question2_db.id
+
+  option1 = OptionCreate(
+    text="Ignorar los errores.",
+    is_correct=False,
+    quiz_question_id=quiz_question2_id
+  )
+  option2 = OptionCreate(
+    text="Let it crash!",
+    is_correct=True,
+    quiz_question_id=quiz_question2_id
+  )
+  option3 = OptionCreate(
+    text="Reiniciar el sistema cada hora.",
+    is_correct=False,
+    quiz_question_id=quiz_question2_id
+  )
+  option4 = OptionCreate(
+    text="Manejar errores con try-catch extensos.",
+    is_correct=False,
+    quiz_question_id=quiz_question2_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 3
+  quiz_question3 = QuizQuestionCreate(
+    question_text="¿En qué año y dónde se desarrolló Erlang?",
+    quiz_id=quiz1_id
+  )
+  quiz_question3_db = await quiz_crud.create_quiz_question(db, quiz_question3)
+  quiz_question3_id = quiz_question3_db.id
+
+  option1 = OptionCreate(
+    text="1986 en los Laboratorios de Ericsson.",
+    is_correct=True,
+    quiz_question_id=quiz_question3_id
+  )
+  option2 = OptionCreate(
+    text="1995 en Microsoft Labs.",
+    is_correct=False,
+    quiz_question_id=quiz_question3_id
+  )
+  option3 = OptionCreate(
+    text="2000 en IBM Research.",
+    is_correct=False,
+    quiz_question_id=quiz_question3_id
+  )
+  option4 = OptionCreate(
+    text="1978 en Bell Labs.",
+    is_correct=False,
+    quiz_question_id=quiz_question3_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 4
+  quiz_question4 = QuizQuestionCreate(
+    question_text="En Erlang, las variables son:",
+    quiz_id=quiz1_id
+  )
+  quiz_question4_db = await quiz_crud.create_quiz_question(db, quiz_question4)
+  quiz_question4_id = quiz_question4_db.id
+
+  option1 = OptionCreate(
+    text="Mutables y pueden reasignarse.",
+    is_correct=False,
+    quiz_question_id=quiz_question4_id
+  )
+  option2 = OptionCreate(
+    text="Inmutables una vez asignadas.",
+    is_correct=True,
+    quiz_question_id=quiz_question4_id
+  )
+  option3 = OptionCreate(
+    text="Siempre se escriben en minúscula.",
+    is_correct=False,
+    quiz_question_id=quiz_question4_id
+  )
+  option4 = OptionCreate(
+    text="No existen en Erlang.",
+    is_correct=False,
+    quiz_question_id=quiz_question4_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  # Pregunta 5
+  quiz_question5 = QuizQuestionCreate(
+    question_text="¿Qué hace io:format en Erlang?",
+    quiz_id=quiz1_id
+  )
+  quiz_question5_db = await quiz_crud.create_quiz_question(db, quiz_question5)
+  quiz_question5_id = quiz_question5_db.id
+
+  option1 = OptionCreate(
+    text="Imprime texto en la consola.",
+    is_correct=True,
+    quiz_question_id=quiz_question5_id
+  )
+  option2 = OptionCreate(
+    text="Define un módulo.",
+    is_correct=False,
+    quiz_question_id=quiz_question5_id
+  )
+  option3 = OptionCreate(
+    text="Crea un proceso concurrente.",
+    is_correct=False,
+    quiz_question_id=quiz_question5_id
+  )
+  option4 = OptionCreate(
+    text="Declara una variable.",
+    is_correct=False,
+    quiz_question_id=quiz_question5_id
+  )
+  await quiz_crud.create_option(db, option1)
+  await quiz_crud.create_option(db, option2)
+  await quiz_crud.create_option(db, option3)
+  await quiz_crud.create_option(db, option4)
+
+  question1 = QuestionCreate(
+    title="How do I print in Erlang?",
+    body="What is the function to print text in Erlang?",
+    tags=["erlang", "print"],
+    user_id=1
+  )
+
+  question1_db = await publication_crud.create_question(db, question1)
+  question1_id = question1_db.id
+
+  answer1 = AnswerCreate(
+    body='Use io:format("Text~n").',
+    question_id=question1_id,
+    user_id=1
+  )
+  await publication_crud.create_answer(db, answer1)
+
+  vote1 = VoteCreate(
+    user_id=1,
+    question_id=question1_id,
+    vote='upvote'
+  )
+  await vote_crud.create_vote(db, vote1)
+
+  # Question 2
+  question2 = QuestionCreate(
+    title="How to define a module in Erlang?",
+    body="What is the syntax to define a module?",
+    tags=["erlang", "module"],
+    user_id=1
+  )
+  question2_db = await publication_crud.create_question(db, question2)
+  question2_id = question2_db.id
+
+  answer2 = AnswerCreate(
+    body='Use -module(module_name). at the top of your file.',
+    question_id=question2_id,
+    user_id=1
+  )
+  await publication_crud.create_answer(db, answer2)
+
+  vote2 = VoteCreate(
+    user_id=1,
+    question_id=question2_id,
+    vote='upvote'
+  )
+  await vote_crud.create_vote(db, vote2)
+
+  # Question 3
+  question3 = QuestionCreate(
+    title="How to export functions in Erlang?",
+    body="How do I make a function public in Erlang?",
+    tags=["erlang", "export"],
+    user_id=1
+  )
+  question3_db = await publication_crud.create_question(db, question3)
+  question3_id = question3_db.id
+
+  answer3 = AnswerCreate(
+    body='Use -export([function_name/arity]).',
+    question_id=question3_id,
+    user_id=1
+  )
+  await publication_crud.create_answer(db, answer3)
+
+  answer3b = AnswerCreate(
+    body='For example: -export([start/0, add/2]).',
+    question_id=question3_id,
+    user_id=1
+  )
+  await publication_crud.create_answer(db, answer3b)
+
+  vote3 = VoteCreate(
+    user_id=1,
+    question_id=question3_id,
+    vote='upvote'
+  )
+  await vote_crud.create_vote(db, vote3)
+
+  vote3b = VoteCreate(
+    user_id=1,
+    question_id=question3_id,
+    vote='upvote'
+  )
+  await vote_crud.create_vote(db, vote3b)

@@ -45,13 +45,20 @@ async def delete_entries_from_db(app: FastAPI) -> None:
     
     logger.info("All entries from the database have been deleted.")
 
-async def create_initial_data(app: FastAPI) -> None:
+async def create_initial_data_total(app: FastAPI) -> None:
     """Create initial data in the database."""
     async with app.state.session_maker() as session:
-        await entries.create_initial_data(session)
+        await entries.create_initial_data_total(session)
 
     logger.info("Initial data created in the database.")
 
+async def create_initial_data_test(app: FastAPI) -> None:
+    """Create initial data for test"""
+    async with app.state.session_maker() as session:
+        await entries.create_initial_data_test(session)
+        
+    logger.info("Initial test data created in the database.")
+    
 async def close_db_connection(app: FastAPI) -> None:
     logger.info("Closing database connection.")
 

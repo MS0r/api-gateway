@@ -8,9 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-USE_TEST_DB = os.getenv("USE_TEST_DB") == "1"
-
-DATABASE_URL = (os.getenv("TEST_DATABASE_URL") if USE_TEST_DB else os.getenv("DATABASE_URL"))
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
