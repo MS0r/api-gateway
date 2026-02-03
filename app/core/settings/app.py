@@ -21,8 +21,12 @@ class AppSettings(BaseAppSettings):
     database_url: PostgresDsn
     max_connection_count: int = 10
     min_connection_count: int = 10
-
+    
     secret_key: SecretStr
+
+    rabbit_host : str
+    rabbit_user : str
+    rabbit_pass : SecretStr
 
     api_prefix: str = "/api"
 

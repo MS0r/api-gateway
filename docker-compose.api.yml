@@ -32,5 +32,11 @@ services:
     container_name: api-dev-sandbox
     ports:
       - "4000:4000"
+  broker:
+    image: rabbitmq:4.2.3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
 volumes:
   pgdata: {}
