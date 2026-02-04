@@ -5,7 +5,14 @@ from loguru import logger
 
 from app.core.settings.app import AppSettings
 from app.core.settings.base import AppEnvTypes
-from app.db.events import close_db_connection, connect_to_db, create_tables, create_initial_data_test, delete_entries_from_db
+from app.db.events import (
+    close_db_connection, 
+    connect_to_db, 
+    create_tables, 
+    create_initial_data_test, 
+    delete_entries_from_db
+    )
+from app.services.queues import ErlangRegistry
 
 
 def create_start_app_handler(
@@ -15,10 +22,9 @@ def create_start_app_handler(
     async def start_app() -> None:
         await connect_to_db(app, settings)
         await create_tables(app)
-        if settings.app_env == AppEnvTypes.test:
+        if settings.crt_data:
             await create_initial_data_test(app)
-        #await delete_entries_from_db(app)
-        #await create_initial_data(app)
+        app.state.erlang_registry = ErlangRegistry(**settings.rabbitmq_kwargs)
 
     return start_app
 
@@ -31,5 +37,6 @@ def create_stop_app_handler(
         await close_db_connection(app)
         if settings.app_env == AppEnvTypes.test:
             await delete_entries_from_db(app)
+        app.state.erlang_registry.close_queues()
 
     return stop_app

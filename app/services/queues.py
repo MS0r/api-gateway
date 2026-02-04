@@ -4,9 +4,18 @@ import uuid
 import json
 
 from loguru import logger
+from typing import Dict
+
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.crud import exercise as exercise_crud
-from app.models.schemas.erlang import ErlangPayload, ErlangCompileResponse, ErlangTestResponse,ErlangTestPayload
+from app.db.crud.exercise import get_exercise
+from app.db.crud.submission import get_submissions_by_user_exercise,create_submission
+from app.models.schemas.submission import SubmissionCreate
+from app.models.schemas.erlang import (
+    ErlangPayload, 
+    ErlangCompileResponse, 
+    ErlangTestResponse,
+    ErlangTestPayload
+    )
 
 class ErlangService:
     def __init__(self, host : str, user : str, password : str, retries = 10):
@@ -52,21 +61,76 @@ class ErlangService:
             ),
             body=json.dumps(payload).encode())
         while self.response is None:
-            self.connection.process_data_events(time_limit=None)
+            self.conn.process_data_events(time_limit=None)
         return self.response
 
-    async def health_check():
+    def close(self):
+        self.channel.queue_delete(queue=self.callback_queue)
+        self.channel.close()
+        self.conn.close()
+
+    async def _test_code_erlang(
+        self, 
+        db: AsyncSession, 
+        source_code: str, 
+        exercise_id: int
+        ) -> ErlangTestResponse:
+
+        exercise = await get_exercise(db, exercise_id)
+        if not exercise:
+            raise ValueError(f"Exercise with ID {exercise_id} not found")
+        
+        payload = ErlangTestPayload(code=source_code, cases=exercise.test_cases)
+        res = self._call(payload.model_dump(by_alias=True))
+        return ErlangTestResponse.model_validate(res)
+
+    async def health_check(self):
         return {"status": "ok", "message": "Erlang service is running"}
 
     def compile_erlang_code(self, payload: ErlangPayload) -> ErlangCompileResponse:
         res = self._call(payload.model_dump(by_alias=True))
         return ErlangCompileResponse.model_validate(res)
-    
-    async def test_code_erlang_v2(self, db: AsyncSession, source_code: str, exercise_id: int) -> ErlangTestResponse:
-        exercise = await exercise_crud.get_exercise(db, exercise_id)
-        if not exercise:
-            raise ValueError(f"Exercise with ID {exercise_id} not found")
-        payload = ErlangTestPayload(code=source_code, cases=exercise.test_cases)
-        res = self._call(payload.model_dump(by_alias=True))
-        return ErlangTestResponse.model_validate(res)
 
+    async def submit_code_erlang(
+        self, 
+        db: AsyncSession, 
+        submission: SubmissionCreate
+        ) -> ErlangTestResponse:
+
+        submitted = await get_submissions_by_user_exercise(
+            db, 
+            submission.exercise_id, 
+            submission.user_id
+        )
+        results = await self._test_code_erlang(
+            db, 
+            submission.code_snippet, 
+            submission.exercise_id
+        )
+        if not submitted and results.test_results.failures == 0 and results.status == "ok":
+            created = await create_submission(db, submission)
+            if not created:
+                raise ValueError("Failed to create submission")
+        return results
+
+class ErlangRegistry:
+
+    def __init__(self, host : str, user : str, password : str):
+        self._host = host
+        self._user = user
+        self._password = password
+        self._services = Dict[str, ErlangService] = {}
+    
+    def get(self, client_id : str) -> ErlangService:
+        if client_id not in self._services:
+            self._services[client_id] = ErlangService(
+                host=self._host,
+                user=self._user,
+                password=self._password
+            )
+        return self._services[client_id]
+    
+    def close_queues(self):
+        while len(self._services) > 0:
+            self._services.popitem().close()
+            

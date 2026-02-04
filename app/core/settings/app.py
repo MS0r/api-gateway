@@ -16,11 +16,12 @@ class AppSettings(BaseAppSettings):
     openapi_url: str = "/openapi.json"
     redoc_url: str = "/redoc"
     title: str = "Erlang Application Api"
-    version: str = "0.0.0"
+    version: str = "0.1.0"
 
     database_url: PostgresDsn
     max_connection_count: int = 10
     min_connection_count: int = 10
+    crt_data : bool = False
     
     secret_key: SecretStr
 
@@ -51,6 +52,14 @@ class AppSettings(BaseAppSettings):
             "redoc_url": self.redoc_url,
             "title": self.title,
             "version": self.version,
+        }
+
+    @property
+    def rabbitmq_kwargs(self) -> Dict[str,Any]:
+        return {
+            "host" : self.rabbit_host,
+            "user" : self.rabbit_user,
+            "password" : self.rabbit_pass
         }
 
     def configure_logging(self) -> None:
