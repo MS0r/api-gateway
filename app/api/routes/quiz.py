@@ -5,7 +5,7 @@ from app.api.dependencies.auth import get_current_user_authorize
 from app.api.dependencies.database import get_db_session
 
 from app.models.domain.user import User
-from app.models.schemas.quiz import QuizCreate, QuizRead, QuizCreated
+from app.models.schemas.quiz import QuizCreate, QuizCreated
 from app.models.schemas.quiz_pass import QuizPassCreate, QuizPassRead
 from app.db.crud import quiz as quiz_crud
 from app.db.crud import quiz_pass as quiz_pass_crud

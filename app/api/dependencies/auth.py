@@ -11,8 +11,8 @@ from app.core.settings.app import AppSettings
 from app.core.config import get_app_settings
 from app.services import jwt
 from app.db.crud import user as user_service
-from app.api.dependencies.database import get_db_session
 from app.db.errors import EntityDoesNotExist
+from app.api.dependencies.database import get_db_session
 from app.models.domain.user import User
 
 HEADER_KEY = "Authorization"

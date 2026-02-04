@@ -1,20 +1,32 @@
 import os
-from dotenv import load_dotenv
-from pathlib import Path
-from pydantic import PostgresDsn
 import pytest
 import pytest_asyncio
-from asgi_lifespan import LifespanManager
-from collections.abc import AsyncGenerator, Generator
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+
+
 from fastapi import FastAPI
-from httpx import AsyncClient, ASGITransport
-from app.core.config import get_app_settings
 from app.services import jwt
+from asgi_lifespan import LifespanManager
+from collections.abc import AsyncGenerator
+from httpx import AsyncClient, ASGITransport
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import (
+    create_async_engine, 
+    AsyncSession, 
+    async_sessionmaker)
 
 # This module initializes the domain models for the application.
-from app.models.domain import course, exercise, publication, quiz, quiz_pass, submission, subunit, unit, user, vote
+from app.models.domain import (
+    course, 
+    exercise, 
+    publication, 
+    quiz, 
+    quiz_pass, 
+    submission, 
+    subunit, 
+    unit, 
+    user, 
+    vote
+    )
 
 @pytest.fixture
 def app() -> FastAPI:

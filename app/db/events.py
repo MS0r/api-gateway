@@ -17,7 +17,10 @@ async def connect_to_db(app : FastAPI, settings: AppSettings) -> None:
         str(settings.database_url),
         echo=True
     )
-    app.state.session_maker = async_sessionmaker(app.state.engine, expire_on_commit=False)
+    app.state.session_maker = async_sessionmaker(
+        app.state.engine, 
+        expire_on_commit=False
+    )
 
     logger.info("Database connection established.")
 

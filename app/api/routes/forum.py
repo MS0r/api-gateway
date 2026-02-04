@@ -10,7 +10,14 @@ from app.api.dependencies.database import get_db_session
 from app.models.domain.publication import Question, Answer
 from app.models.domain.vote import VoteType
 from app.models.domain.user import User
-from app.models.schemas.publication import QuestionCreate, QuestionRead, AnswerCreate, AnswerRead, QuestionCreateNoID, QuestionReadSingle
+from app.models.schemas.publication import (
+    QuestionCreate, 
+    QuestionRead, 
+    AnswerCreate, 
+    AnswerRead, 
+    QuestionCreateNoID, 
+    QuestionReadSingle
+    )
 from app.models.schemas.vote import VoteCreate, VoteRead
 
 from app.db.crud import publication as publication_crud

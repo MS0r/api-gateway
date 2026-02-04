@@ -1,8 +1,5 @@
 from enum import Enum
-import sys
-
 from pydantic_settings import BaseSettings
-
 
 class AppEnvTypes(Enum):
     prod: str = "prod"

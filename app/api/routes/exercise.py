@@ -5,8 +5,16 @@ from app.api.dependencies.auth import get_current_user_authorize
 from app.api.dependencies.database import get_db_session
 
 from app.models.domain.user import User
-from app.models.schemas.exercise import ExerciseCreate, ExerciseRead, ExerciseUpdate
-from app.models.schemas.submission import SubmissionCreate, SubmissionRead, SubmissionCreateNoID
+from app.models.schemas.exercise import (
+    ExerciseCreate, 
+    ExerciseRead, 
+    ExerciseUpdate
+    )
+from app.models.schemas.submission import (
+    SubmissionCreate, 
+    SubmissionRead, 
+    SubmissionCreateNoID
+    )
 from app.models.schemas.erlang import ErlangTestResponse
 
 

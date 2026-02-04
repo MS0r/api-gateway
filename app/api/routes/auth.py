@@ -2,7 +2,13 @@ from fastapi import APIRouter, Body, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
-from app.models.schemas.user import UserCreate, UserLogin, UserWithToken, UserRead, UserAuthRead
+from app.models.schemas.user import (
+    UserCreate, 
+    UserLogin, 
+    UserWithToken, 
+    UserRead, 
+    UserAuthRead
+    )
 from app.models.domain.user import User
 from app.api.dependencies.database import get_db_session
 from app.db.crud import user as user_crud

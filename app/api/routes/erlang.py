@@ -1,7 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.schemas.erlang import ErlangPayload, ErlangCompileResponse, ErlangTestResponse, ErlangTestPayload
+from app.models.schemas.erlang import (
+    ErlangPayload, 
+    ErlangCompileResponse, 
+    ErlangTestResponse
+    )
 from app.api.dependencies.database import get_db_session
 from app.services import erlang as erlang_service
 

@@ -5,7 +5,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.dependencies.auth import get_current_user_authorize
 from app.models.domain.user import User
 from app.db.crud import course as course_crud
-from app.models.schemas.course import CourseCreate, CourseUpdate, CourseRead, EnrollmentRead
+from app.models.schemas.course import (
+    CourseCreate, 
+    CourseUpdate, 
+    CourseRead, 
+    EnrollmentRead
+    )
 from app.models.schemas.unit import UnitRead
 from app.api.dependencies.database import get_db_session
 

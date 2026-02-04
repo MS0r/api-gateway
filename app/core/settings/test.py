@@ -16,6 +16,7 @@ class TestAppSettings(AppSettings):
     min_connection_count: int = 5
 
     logging_level: int = logging.DEBUG
+    crt_data : bool = True
 
     model_config = {
         **AppSettings.model_config,
