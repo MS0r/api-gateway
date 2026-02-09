@@ -19,7 +19,7 @@ router = APIRouter()
 
 @router.post("", response_model=CourseRead, name="course:create")
 async def create_course_route(
-    course_create: CourseCreate = Body(..., embed=True, alias="course"), 
+    course_create: CourseCreate,
     db: AsyncSession = Depends(get_db_session)
 ) -> CourseRead:
     course = await course_crud.create_course(db, course_create)
@@ -40,7 +40,7 @@ async def get_course_route(
 @router.put("/{course_id}", response_model=CourseRead, name="course:update")
 async def update_course_route(
     course_id: int,
-    course_update: CourseUpdate = Body(..., embed=True, alias="course"),
+    course_update: CourseUpdate,
     db: AsyncSession = Depends(get_db_session)
 ) -> CourseRead:
     course = await course_crud.update_course(db, course_id, course_update)

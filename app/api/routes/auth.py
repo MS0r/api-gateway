@@ -20,7 +20,7 @@ router = APIRouter()
 
 @router.post("/register", response_model=UserWithToken, name="user:register")
 async def create_user_route(
-    user_create: UserCreate = Body(..., embed=True, alias="user"), 
+    user_create: UserCreate, 
     db: AsyncSession = Depends(get_db_session),
     settings : AppSettings =  Depends(get_app_settings)
 ) -> UserWithToken:
@@ -42,7 +42,7 @@ async def create_user_route(
 
 @router.post("/login", response_model=UserWithToken, name="user:login")
 async def login_user_route(
-    user_login: UserLogin = Body(..., embed=True, alias="user"), 
+    user_login: UserLogin, 
     db: AsyncSession = Depends(get_db_session),
     settings: AppSettings = Depends(get_app_settings)
 ) -> UserWithToken:

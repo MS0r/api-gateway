@@ -45,7 +45,7 @@ async def search_questions_route(
 
 @router.post("/questions", response_model=QuestionRead, name="forum:create_question")
 async def create_question_route(
-    question: QuestionCreateNoID = Body(..., embed=True),
+    question: QuestionCreateNoID,
     user: User = Depends(get_current_user_authorize()),
     db: AsyncSession = Depends(get_db_session)
 ) -> QuestionRead:
@@ -104,7 +104,7 @@ async def get_answers_route(
 @router.post("/vote/{question_id}", response_model=QuestionReadSingle, name="forum:vote_question")
 async def vote_question_route(
     question_id: int,
-    vote : VoteType = Body(..., embed=True),
+    vote : VoteType,
     user: User = Depends(get_current_user_authorize()),
     db: AsyncSession = Depends(get_db_session)
 ) -> QuestionReadSingle:
@@ -116,7 +116,7 @@ async def vote_question_route(
 @router.post("/vote/answer/{answer_id}", response_model=AnswerRead, name="forum:vote_answer")
 async def vote_answer_route(
     answer_id: int,
-    vote : VoteType = Body(..., embed=True),
+    vote : VoteType,
     user: User = Depends(get_current_user_authorize()),
     db: AsyncSession = Depends(get_db_session)
 ) -> AnswerRead:

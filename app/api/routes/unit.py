@@ -24,7 +24,7 @@ router = APIRouter()
 
 @router.post("",response_model=SingleUnit,name="unit:create")
 async def create_unit_route(
-    unit_create: UnitCreate = Body(..., embed=True,alias="unit"), 
+    unit_create: UnitCreate, 
     db: AsyncSession = Depends(get_db_session)
 ) -> SingleUnit:
     unit = await unit_crud.create_unit(db, unit_create)
@@ -45,7 +45,7 @@ async def get_unit_route(
 @router.put("/{unit_id}", response_model=SingleUnit, name="unit:update")
 async def update_unit_route(
     unit_id: int,
-    unit_update: UnitUpdate = Body(..., embed=True, alias="unit"),
+    unit_update: UnitUpdate,
     db: AsyncSession = Depends(get_db_session)
 ) -> SingleUnit:
     unit = await unit_crud.update_unit(db, unit_id, unit_update)
@@ -56,7 +56,7 @@ async def update_unit_route(
 @router.post("/{unit_id}", response_model=SubunitCreated, name="unit:create_subunit")
 async def create_subunit_route(
     unit_id: int,
-    subunit_create: SubunitCreateNoID = Body(..., embed=True, alias="subunit"),
+    subunit_create: SubunitCreateNoID,
     db: AsyncSession = Depends(get_db_session)
 ) -> SubunitCreated:
     subunit = await subunit_crud.create_subunit(db, SubunitCreate(**subunit_create.model_dump(by_alias=True), unit_id=unit_id))

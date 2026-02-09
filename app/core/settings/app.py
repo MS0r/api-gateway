@@ -25,9 +25,9 @@ class AppSettings(BaseAppSettings):
     
     secret_key: SecretStr
 
-    rabbit_host : str
-    rabbit_user : str
-    rabbit_pass : SecretStr
+    rabbitmq_default_user : str
+    rabbitmq_host : str
+    rabbitmq_default_pass : SecretStr
 
     api_prefix: str = "/api"
 
@@ -57,9 +57,9 @@ class AppSettings(BaseAppSettings):
     @property
     def rabbitmq_kwargs(self) -> Dict[str,Any]:
         return {
-            "host" : self.rabbit_host,
-            "user" : self.rabbit_user,
-            "password" : self.rabbit_pass
+            "host" : self.rabbitmq_host,
+            "user" : self.rabbitmq_default_user,
+            "password" : self.rabbitmq_default_pass.get_secret_value()
         }
 
     def configure_logging(self) -> None:

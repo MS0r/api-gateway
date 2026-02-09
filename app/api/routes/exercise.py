@@ -26,7 +26,7 @@ router = APIRouter()
 
 @router.post("",response_model=ExerciseRead, name="exercise:create_exercise")
 async def create_exercise_route(
-    exercise: ExerciseCreate = Body(..., embed=True),
+    exercise: ExerciseCreate,
     db: AsyncSession = Depends(get_db_session)
 ) -> ExerciseRead:
     exercise_created = await exercise_crud.create_exercise(db,exercise)
@@ -58,7 +58,7 @@ async def get_submissions_route(
 @router.post("/{exercise_id}/submit", response_model=ErlangTestResponse, name="exercise:submit_exercise")
 async def submit_exercise_route(
     exercise_id: int,
-    submission: SubmissionCreateNoID = Body(..., embed=True),
+    submission: SubmissionCreateNoID,
     user: User = Depends(get_current_user_authorize()),
     db: AsyncSession = Depends(get_db_session)
 ) -> ErlangTestResponse:
@@ -79,8 +79,8 @@ async def delete_submission_route(
 @router.put("/{exercise_id}", response_model=ExerciseRead, name="exercise:update_exercise")
 async def update_exercise_route(
     exercise_id : int,
-    db: AsyncSession = Depends(get_db_session),
-    update : ExerciseUpdate =  Body(..., embed=True),
+    update : ExerciseUpdate,
+    db: AsyncSession = Depends(get_db_session)
 ):
     exercise = await exercise_crud.update_exercise(db, exercise_id, update)
     if not exercise:

@@ -14,8 +14,8 @@ router = APIRouter()
 
 @router.post("", response_model=QuizCreated, name="quiz:create_quiz")
 async def create_quiz_router(
-    db : AsyncSession = Depends(get_db_session),
-    quiz : QuizCreate = Body(..., embed=True),
+    quiz : QuizCreate,
+    db : AsyncSession = Depends(get_db_session)
 ) -> QuizCreated:
     quiz_pass = await quiz_crud.create_quiz(db, quiz)
     if not quiz_pass:
