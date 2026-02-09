@@ -15,12 +15,10 @@ async def test_create_unit(app: FastAPI, client: AsyncClient, test_course : Cour
 
     # Create a unit
     unit_data = {
-        "unit": {
             "title": "Test Unit",
             "description": "Unit for testing",
             "order": 1,
             "course_id": course_id
-        }
     }
     response = await client.post(app.url_path_for("unit:create"), json=unit_data)
     assert response.status_code == 200
@@ -42,10 +40,8 @@ async def test_get_unit(app: FastAPI, client: AsyncClient, test_unit : Unit):
 @pytest.mark.asyncio
 async def test_update_unit(app: FastAPI, client: AsyncClient, test_unit : Unit):
     update_data = {
-        "unit": {
             "title": "New Title",
             "description": "New description"
-        }
     }
     response = await client.put(app.url_path_for("unit:update", unit_id=test_unit.id), json=update_data)
     assert response.status_code == 200
@@ -56,12 +52,10 @@ async def test_update_unit(app: FastAPI, client: AsyncClient, test_unit : Unit):
 @pytest.mark.asyncio
 async def test_create_subunit(app: FastAPI, client: AsyncClient, test_unit: Unit):
     subunit_data = {
-        "subunit": {
             "title": "Test Subunit",
             "description": "Subunit for testing",
             "order": 1,
             "blocks" : [{"type" : "text", "value" : ""}]
-        }
     }
     response = await client.post(app.url_path_for("unit:create_subunit", unit_id=test_unit.id), json=subunit_data)
     assert response.status_code == 200
@@ -91,12 +85,10 @@ async def test_get_subunits_for_bad_unit(app: FastAPI, client: AsyncClient):
 async def test_create_unit_failure(app: FastAPI, client: AsyncClient, mocker):
     mocker.patch("app.db.crud.unit.create_unit", return_value=None)
     unit_data = {
-        "unit": {
             "title": "",
             "description": "",
             "order": 1,
             "course_id": 1
-        }
     }
     resp = await client.post(app.url_path_for("unit:create"), json=unit_data)
     assert resp.status_code == HTTP_400_BAD_REQUEST
@@ -119,12 +111,10 @@ async def test_update_unit_not_found(app: FastAPI, client: AsyncClient, mocker):
 @pytest.mark.asyncio
 async def test_create_subunit_failure(app: FastAPI, client: AsyncClient, mocker):
     subunit_data = {
-        "subunit": {
             "title": "",
             "description": "",
             "order": 1,
             "blocks" : []
-        }
     }
     mocker.patch("app.db.crud.subunit.create_subunit", return_value=None)
     resp = await client.post(app.url_path_for("unit:create_subunit", unit_id=1),

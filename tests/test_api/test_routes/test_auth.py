@@ -36,7 +36,7 @@ async def test_register_user_when_it_exists(
 ) -> None:
     response = await client.post(
         app.url_path_for("user:register"),
-        json={"user" : {"username": test_user.username,"email" : test_user.email ,"password" : "password"}},
+        json={"username": test_user.username,"email" : test_user.email ,"password" : "password"},
     )
     assert response.status_code == HTTP_409_CONFLICT
 
@@ -44,7 +44,7 @@ async def test_register_user_when_it_exists(
 async def test_register_user_success(app: FastAPI, client: AsyncClient):
     response = await client.post(
         app.url_path_for("user:register"),
-        json={"user": {"username": "newuser", "email": "newuser@email.com", "password": "password123"}},
+        json={"username": "newuser", "email": "newuser@email.com", "password": "password123"},
     )
     assert response.status_code == 200
     data = response.json()
@@ -57,7 +57,7 @@ async def test_register_user_invalid(app: FastAPI, client: AsyncClient):
     # Missing required fields
     response = await client.post(
         app.url_path_for("user:register"),
-        json={"user": {"username": "", "email": "", "password": ""}},
+        json={"username": "", "email": "", "password": ""},
     )
     assert response.status_code == HTTP_400_BAD_REQUEST or response.status_code == 422 or response.status_code == HTTP_409_CONFLICT
 
@@ -66,12 +66,12 @@ async def test_login_user_success(app: FastAPI, client: AsyncClient):
     # Register first
     await client.post(
         app.url_path_for("user:register"),
-        json={"user": {"username": "loginuser", "email": "loginuser@email.com", "password": "password123"}},
+        json={"username": "loginuser", "email": "loginuser@email.com", "password": "password123"},
     )
     # Login
     response = await client.post(
         app.url_path_for("user:login"),
-        json={"user": {"username": "loginuser", "password": "password123"}},
+        json={"username": "loginuser", "password": "password123"},
     )
     assert response.status_code == 200
     data = response.json()
@@ -83,12 +83,12 @@ async def test_login_user_invalid_password(app: FastAPI, client: AsyncClient):
     # Register first
     await client.post(
         app.url_path_for("user:register"),
-        json={"user": {"username": "badpassuser", "email": "badpass@email.com", "password": "password123"}},
+        json={"username": "badpassuser", "email": "badpass@email.com", "password": "password123"},
     )
     # Try login with wrong password
     response = await client.post(
         app.url_path_for("user:login"),
-        json={"user": {"username": "badpassuser", "password": "wrongpassword"}},
+        json={"username": "badpassuser", "password": "wrongpassword"},
     )
     assert response.status_code == HTTP_401_UNAUTHORIZED
 
@@ -96,7 +96,7 @@ async def test_login_user_invalid_password(app: FastAPI, client: AsyncClient):
 async def test_login_user_not_found(app: FastAPI, client: AsyncClient):
     response = await client.post(
         app.url_path_for("user:login"),
-        json={"user": {"username": "nouser", "password": "password123"}},
+        json={"username": "nouser", "password": "password123"},
     )
     assert response.status_code == HTTP_401_UNAUTHORIZED
 
@@ -106,7 +106,7 @@ async def test_register_user_create_returns_none(app: FastAPI, client: AsyncClie
 
     response = await client.post(
         app.url_path_for("user:register"),
-        json={"user": {"username": "anyuser", "email": "any@email.com", "password": "password"}},
+        json={"username": "anyuser", "email": "any@email.com", "password": "password"},
     )
     assert response.status_code == 400
 
@@ -118,6 +118,6 @@ async def test_register_user_integrity_error(app: FastAPI, client: AsyncClient, 
 
     response = await client.post(
         app.url_path_for("user:register"),
-        json={"user": {"username": "anyuser", "email": "any@email.com", "password": "password"}},
+        json={"username": "anyuser", "email": "any@email.com", "password": "password"},
     )
     assert response.status_code == 409

@@ -1,10 +1,8 @@
 from pydantic import BaseModel
 from app.models.schemas.rwmodel import RWModel
 
-class SubmissionCreateNoID(BaseModel):
+class SubmissionCreate(BaseModel):
     code_snippet: str
-
-class SubmissionCreate(SubmissionCreateNoID):
     exercise_id: int
     user_id: int
 

@@ -8,10 +8,8 @@ from app.models.domain.subunit import Subunit
 @pytest.mark.asyncio
 async def test_create_course(app: FastAPI, client: AsyncClient):
     course_data = {
-        "course": {
             "title": "Sample Course",
             "description": "A course for testing"
-        }
     }
     response = await client.post(
         app.url_path_for("course:create"),
@@ -28,7 +26,7 @@ async def test_create_course_returns_none(app: FastAPI, client: AsyncClient, moc
 
     response = await client.post(
         app.url_path_for("course:create"),
-        json={"course": {"title": "anytitle", "description": "anydescription"}},
+        json={"title": "anytitle", "description": "anydescription"},
     )
     assert response.status_code == 400
 
@@ -37,7 +35,7 @@ async def test_create_course_invalid(app: FastAPI, client: AsyncClient):
     # Missing required fields
     response = await client.post(
         app.url_path_for("course:create"),
-        json={"course": {}}
+        json={}
     )
     assert response.status_code == HTTP_400_BAD_REQUEST or response.status_code == 422
 
@@ -61,10 +59,8 @@ async def test_update_course(app: FastAPI, client: AsyncClient, test_course: Cou
     course_id = test_course.id
     # Update the course
     update_data = {
-        "course": {
             "title": "New Title",
             "description": "New Description"
-        }
     }
     response = await client.put(
         app.url_path_for("course:update", course_id=course_id),
@@ -78,10 +74,8 @@ async def test_update_course(app: FastAPI, client: AsyncClient, test_course: Cou
 @pytest.mark.asyncio
 async def test_update_course_not_found(app: FastAPI, client: AsyncClient):
     update_data = {
-        "course": {
             "title": "Doesn't Exist",
             "description": "No course"
-        }
     }
     response = await client.put(
         app.url_path_for("course:update", course_id=9999),

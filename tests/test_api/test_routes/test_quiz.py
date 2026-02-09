@@ -8,7 +8,7 @@ from app.models.domain.subunit import Subunit
 
 @pytest.mark.asyncio
 async def test_create_quiz_via_api_and_submit(app: FastAPI, client: AsyncClient, test_subunit : Subunit, token : str):    
-    quiz_payload = {"quiz": {"title": "Submit API Quiz", "description": "Created for submit test", "subunit_id": test_subunit.id}}
+    quiz_payload = {"title": "Submit API Quiz", "description": "Created for submit test", "subunit_id": test_subunit.id}
     create_resp = await client.post(app.url_path_for("quiz:create_quiz"), json=quiz_payload)
     # Accept creation or validation/other acceptable responses
     assert create_resp.status_code == 200
@@ -40,7 +40,7 @@ async def test_get_quiz_passes_list(app: FastAPI, client: AsyncClient, test_quiz
 async def test_create_quiz_failure(app: FastAPI, client: AsyncClient, mocker):
     # Mock quiz creation to fail
     mocker.patch("app.db.crud.quiz.create_quiz", return_value=None)
-    resp = await client.post(app.url_path_for("quiz:create_quiz"), json={"quiz": {"title": "Fail Quiz", "description" : "", "subunit_id" : 1 }})
+    resp = await client.post(app.url_path_for("quiz:create_quiz"), json={"title": "Fail Quiz", "description" : "", "subunit_id" : 1 })
     assert resp.status_code == HTTP_400_BAD_REQUEST
     assert "Failed to create quiz" in resp.json()["errors"] 
 

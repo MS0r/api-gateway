@@ -12,8 +12,7 @@ from app.models.schemas.exercise import (
     )
 from app.models.schemas.submission import (
     SubmissionCreate, 
-    SubmissionRead, 
-    SubmissionCreateNoID
+    SubmissionRead
     )
 from app.models.schemas.erlang import ErlangTestResponse
 
@@ -58,15 +57,16 @@ async def get_submissions_route(
 @router.post("/{exercise_id}/submit", response_model=ErlangTestResponse, name="exercise:submit_exercise")
 async def submit_exercise_route(
     exercise_id: int,
-    submission: SubmissionCreateNoID,
+    code_snippet: str = Body(..., embed=True),
     user: User = Depends(get_current_user_authorize()),
     db: AsyncSession = Depends(get_db_session)
 ) -> ErlangTestResponse:
     try:
-        sub = SubmissionCreate(code_snippet=submission.code_snippet, user_id=user.id, exercise_id=exercise_id)
+        sub = SubmissionCreate(code_snippet=code_snippet, user_id=user.id, exercise_id=exercise_id)
         test_response = await erlang_service.submit_code_erlang(db, sub)
         return test_response
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.delete("/submission/{submission_id}",response_model=bool, name="exercise:delete_submission")
