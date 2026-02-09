@@ -3,6 +3,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.dependencies.auth import get_current_user_authorize
 from app.api.dependencies.database import get_db_session
+from app.api.dependencies.erlang import get_erlang_service
 
 from app.models.domain.user import User
 from app.models.schemas.exercise import (
@@ -16,10 +17,9 @@ from app.models.schemas.submission import (
     )
 from app.models.schemas.erlang import ErlangTestResponse
 
-
 from app.db.crud import exercise as exercise_crud
 from app.db.crud import submission as submission_crud
-from app.services import erlang as erlang_service
+
 
 router = APIRouter()
 
@@ -59,14 +59,14 @@ async def submit_exercise_route(
     exercise_id: int,
     code_snippet: str = Body(..., embed=True),
     user: User = Depends(get_current_user_authorize()),
-    db: AsyncSession = Depends(get_db_session)
+    db: AsyncSession = Depends(get_db_session),
+    erlang = Depends(get_erlang_service)
 ) -> ErlangTestResponse:
     try:
         sub = SubmissionCreate(code_snippet=code_snippet, user_id=user.id, exercise_id=exercise_id)
-        test_response = await erlang_service.submit_code_erlang(db, sub)
+        test_response = await erlang.submit_code_erlang(db, sub)
         return test_response
     except Exception as e:
-        print(e)
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.delete("/submission/{submission_id}",response_model=bool, name="exercise:delete_submission")

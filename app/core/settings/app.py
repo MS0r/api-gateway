@@ -55,6 +55,10 @@ class AppSettings(BaseAppSettings):
         }
 
     @property
+    def rabbitmq_cnt_str(self) -> str:
+        return f"amqp://{self.rabbitmq_default_user}:{self.rabbitmq_default_pass.get_secret_value()}@{self.rabbitmq_host}"
+
+    @property
     def rabbitmq_kwargs(self) -> Dict[str,Any]:
         return {
             "host" : self.rabbitmq_host,

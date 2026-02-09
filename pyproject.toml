@@ -33,7 +33,13 @@ dependencies = [
     "cffi==1.17.1",
     "cryptography==45.0.5",
     "PyJWT==2.10.1",
-    "pycparser==2.22"
+    "pycparser==2.22",
+    "aio-pika==9.5.8",
+    "aiormq==6.9.2",
+    "multidict==6.7.1",
+    "pamqp==3.3.0",
+    "propcache==0.4.1",
+    "yarl==1.22.0",
 ]
 
 [project.optional-dependencies]

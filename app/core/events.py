@@ -1,3 +1,4 @@
+import aio_pika
 from typing import Callable
 
 from fastapi import FastAPI
@@ -12,7 +13,7 @@ from app.db.events import (
     create_initial_data_test, 
     delete_entries_from_db
     )
-from app.services.queues import ErlangRegistry
+from app.services.erlang import ErlangService
 
 
 def create_start_app_handler(
@@ -24,7 +25,14 @@ def create_start_app_handler(
         await create_tables(app)
         if settings.crt_data:
             await create_initial_data_test(app)
-        app.state.erlang_registry = ErlangRegistry(**settings.rabbitmq_kwargs)
+        app.state.rabbit_connection = await aio_pika.connect_robust(
+            settings.rabbitmq_cnt_str
+        )
+
+        channel = await app.state.rabbit_connection.channel()
+        await channel.set_qos(prefetch_count=10)
+        
+        app.state.erlang_service = await ErlangService.create(channel)
 
     return start_app
 
@@ -37,6 +45,6 @@ def create_stop_app_handler(
         await close_db_connection(app)
         if settings.app_env == AppEnvTypes.test:
             await delete_entries_from_db(app)
-        app.state.erlang_registry.close_queues()
+        await app.state.rabbit_connection.close()
 
     return stop_app

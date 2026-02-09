@@ -11,11 +11,9 @@ async def test_create_question(app: FastAPI, client: AsyncClient, token: str):
     response = await client.post(
         app.url_path_for("forum:create_question"),
         json={
-            "question": {
                 "title": "Test Question",
                 "body": "This is a test question.",
                 "tags": ["erlang"]
-            }
         },
         headers={"Authorization": f"Token {token}"}
     )
@@ -31,11 +29,9 @@ async def test_create_question_unauthorized(app: FastAPI, client: AsyncClient):
     response = await client.post(
         app.url_path_for("forum:create_question"),
         json={
-            "question": {
                 "title": "Unauthorized",
                 "body": "Should fail",
                 "tags": []
-            }
         }
     )
     assert response.status_code == HTTP_403_FORBIDDEN
