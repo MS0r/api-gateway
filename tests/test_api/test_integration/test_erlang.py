@@ -1,8 +1,11 @@
 import pytest
 from fastapi import FastAPI
 from httpx import AsyncClient
+from tests.utils import mockraise
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_422_UNPROCESSABLE_ENTITY, HTTP_500_INTERNAL_SERVER_ERROR
 from app.models.domain.exercise import Exercise
+from app.services.erlang import ErlangService
+
 
 @pytest.mark.asyncio
 async def test_execute_valid_erlang_code(
@@ -27,16 +30,15 @@ async def test_execute_valid_erlang_code(
     assert "Hello, world!" in data["result"]
     assert data["reason"] is None
 
-# @pytest.mark.asyncio
-# async def test_execute_erlang_code_fail(app: FastAPI, client: AsyncClient, mocker):
-#     mocker.patch("app.services.ErlangService.compile_erlang_code", side_effect=Exception("Test failed"))
+@pytest.mark.asyncio
+async def test_execute_erlang_code_fail(app: FastAPI, client: AsyncClient, mocker):
+    mocker.patch.object(ErlangService,"compile_erlang_code",mockraise("Test failed"))
+    resp = await client.post(
+        app.url_path_for("erlang:compile"),
+        json={"op" : "", "code" : ""}
+    )
 
-#     resp = await client.post(
-#         app.url_path_for("erlang:compile"),
-#         json={"op" : "", "code" : ""}
-#     )
-
-#     assert resp.status_code == 500
+    assert resp.status_code == 500
 
 @pytest.mark.asyncio
 async def test_execute_syntax_error(
@@ -182,13 +184,12 @@ async def test_erlang_test_endpoint_with_exercise(app: FastAPI, client: AsyncCli
     assert data["status"] in ("ok", "error")
     assert ("result" in data) or ("cases" in data) or ("test_results" in data)
 
-# @pytest.mark.asyncio
-# async def test_erlang_test_endpoint_with_exercise_fail(app: FastAPI, client: AsyncClient, mocker):
-#     mocker.patch("app.services.erlang.test_code_erlang", side_effect=Exception("Test failed"))
+@pytest.mark.asyncio
+async def test_erlang_test_endpoint_with_exercise_fail(app: FastAPI, client: AsyncClient, mocker):
+    mocker.patch.object(ErlangService,"_test_code_erlang",mockraise("Test Failed"))
+    resp = await client.post(
+        app.url_path_for("erlang:test", exercise_id=1),
+        json={"source_code" : ""}
+    )
 
-#     resp = await client.post(
-#         app.url_path_for("erlang:test", exercise_id=1),
-#         json={"source_code" : ""}
-#     )
-
-#     assert resp.status_code == 500
+    assert resp.status_code == 500

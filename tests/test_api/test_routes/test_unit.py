@@ -3,7 +3,6 @@ from fastapi import FastAPI
 from httpx import AsyncClient
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
 
-from app.models.schemas.unit import UnitCreate
 from app.models.domain.course import Course
 from app.models.domain.unit import Unit
 from app.models.domain.subunit import Subunit
