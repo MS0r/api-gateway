@@ -1,43 +1,55 @@
-# Create user progress, user course enrolled, user code submission, and user quiz answers web responses
+"""User service for managing user progress and course enrollment."""
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.schemas.progress import ProgressSchema
-
+from app.services.base import BaseService, Result, NotFoundError
 from app.db.crud import quiz_pass as qa_crud
 from app.db.crud import submission as sub_crud
 from app.db.crud import quiz as quiz_crud
 from app.db.crud import exercise as exercise_crud
+from app.models.schemas.progress import ProgressSchema
 
 
-async def get_user_progress(user_id : int, course_id : int, db : AsyncSession) -> ProgressSchema:
+class UserService(BaseService):
 
-    quiz_passes = await qa_crud.get_quiz_passes_from_user_course(db, user_id, course_id)
-    submissions = await sub_crud.get_submissions_from_user_course(db, user_id, course_id)
-    
-    quizzes_course = await quiz_crud.get_course_quizzes(db, course_id)
-    exercises_course = await exercise_crud.get_course_exercises(db, course_id)
+    def __init__(self, db: AsyncSession):
+        self.db = db
 
-    completed_quizzes = len(quiz_passes)
-    completed_exercises = len(submissions)
+    async def health_check(self) -> dict:
+        """Return service health status."""
+        return {"status": "ok", "service": "user"}
 
-    total_quizzes = len(quizzes_course)
-    total_exercises = len(exercises_course)
+    async def get_user_progress(
+        self, user_id: int, course_id: int
+    ) -> Result[ProgressSchema]:
+        quiz_passes = await qa_crud.get_quiz_passes_from_user_course(
+            self.db, user_id, course_id
+        )
+        submissions = await sub_crud.get_submissions_from_user_course(
+            self.db, user_id, course_id
+        )
 
-    if total_quizzes > 0:
-        quiz_progress = completed_quizzes / total_quizzes
-    else:
-        quiz_progress = 0.0
-    if total_exercises > 0:
-        exercise_progress = completed_exercises / total_exercises
-    else:
-        exercise_progress = 0.0
+        quizzes_course = await quiz_crud.get_course_quizzes(self.db, course_id)
+        exercises_course = await exercise_crud.get_course_exercises(self.db, course_id)
 
-    progress = ((quiz_progress + exercise_progress) / 2) * 100
+        completed_quizzes = len(quiz_passes)
+        completed_exercises = len(submissions)
+        total_quizzes = len(quizzes_course)
+        total_exercises = len(exercises_course)
 
-    return ProgressSchema(
-        progress=progress,
-        total_quizzes=total_quizzes,
-        completed_quizzes=completed_quizzes,
-        total_exercises=total_exercises,
-        completed_exercises=completed_exercises,
-    )
+        quiz_progress = completed_quizzes / total_quizzes if total_quizzes > 0 else 0.0
+        exercise_progress = (
+            completed_exercises / total_exercises if total_exercises > 0 else 0.0
+        )
+
+        overall_progress = ((quiz_progress + exercise_progress) / 2) * 100
+
+        progress = ProgressSchema(
+            progress=overall_progress,
+            total_quizzes=total_quizzes,
+            completed_quizzes=completed_quizzes,
+            total_exercises=total_exercises,
+            completed_exercises=completed_exercises,
+        )
+
+        return Result.ok(progress)

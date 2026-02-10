@@ -1,8 +1,8 @@
 import pytest
 from fastapi import FastAPI
 from httpx import AsyncClient
-from tests.utils import mockraise
-from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
+from tests.utils import mockServiceRaise
+from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR
 from app.models.domain.unit import Unit
 from app.models.domain.exercise import Exercise
 from app.models.domain.submission import Submission
@@ -121,13 +121,13 @@ async def test_get_submissions_not_found(app: FastAPI, client: AsyncClient, mock
 @pytest.mark.asyncio
 async def test_submit_exercise_exception(app: FastAPI, client: AsyncClient, token: str, mocker):
     headers = {"Authorization": f"Token {token}"}
-    mocker.patch.object(ErlangService,"submit_code_erlang",mockraise("Boom"))
+    mocker.patch.object(ErlangService,"submit_code_erlang",mockServiceRaise("Boom"))
     resp = await client.post(
         app.url_path_for("exercise:submit_exercise", exercise_id=1),
         json={"code_snippet": "error"},
         headers=headers
     )
-    assert resp.status_code == HTTP_400_BAD_REQUEST
+    assert resp.status_code == HTTP_500_INTERNAL_SERVER_ERROR
     assert "Boom" in resp.json()["errors"]
 
 @pytest.mark.asyncio

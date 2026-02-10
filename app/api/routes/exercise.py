@@ -6,37 +6,32 @@ from app.api.dependencies.database import get_db_session
 from app.api.dependencies.erlang import get_erlang_service
 
 from app.models.domain.user import User
-from app.models.schemas.exercise import (
-    ExerciseCreate, 
-    ExerciseRead, 
-    ExerciseUpdate
-    )
-from app.models.schemas.submission import (
-    SubmissionCreate, 
-    SubmissionRead
-    )
+from app.models.schemas.exercise import ExerciseCreate, ExerciseRead, ExerciseUpdate
+from app.models.schemas.submission import SubmissionCreate, SubmissionRead
 from app.models.schemas.erlang import ErlangTestResponse
 
 from app.db.crud import exercise as exercise_crud
 from app.db.crud import submission as submission_crud
+from app.services.erlang import ErlangService
+from app.services.base import NotFoundError, ValidationError
 
 
 router = APIRouter()
 
-@router.post("",response_model=ExerciseRead, name="exercise:create_exercise")
+
+@router.post("", response_model=ExerciseRead, name="exercise:create_exercise")
 async def create_exercise_route(
-    exercise: ExerciseCreate,
-    db: AsyncSession = Depends(get_db_session)
+    exercise: ExerciseCreate, db: AsyncSession = Depends(get_db_session)
 ) -> ExerciseRead:
-    exercise_created = await exercise_crud.create_exercise(db,exercise)
+    exercise_created = await exercise_crud.create_exercise(db, exercise)
     if not exercise_created:
         raise HTTPException(status_code=400, detail="Failed to create exercise")
     return ExerciseRead.model_validate(exercise_created)
 
+
 @router.get("/{exercise_id}", response_model=ExerciseRead, name="exercise:get_exercise")
 async def get_exercise_route(
-    exercise_id: int,
-    db: AsyncSession = Depends(get_db_session)
+    exercise_id: int, db: AsyncSession = Depends(get_db_session)
 ) -> ExerciseRead:
     exercise = await exercise_crud.get_exercise(db, exercise_id)
     if not exercise:
@@ -44,43 +39,66 @@ async def get_exercise_route(
     return ExerciseRead.model_validate(exercise)
 
 
-@router.get("/{exercise_id}/submissions", response_model=List[SubmissionRead], name="exercise:get_submissions")
+@router.get(
+    "/{exercise_id}/submissions",
+    response_model=List[SubmissionRead],
+    name="exercise:get_submissions",
+)
 async def get_submissions_route(
-    exercise_id: int,
-    db: AsyncSession = Depends(get_db_session)
+    exercise_id: int, db: AsyncSession = Depends(get_db_session)
 ) -> List[SubmissionRead]:
     submissions = await submission_crud.get_submissions_by_exercise_id(db, exercise_id)
     if not submissions:
-        raise HTTPException(status_code=404, detail="No submissions found for this exercise")
+        raise HTTPException(
+            status_code=404, detail="No submissions found for this exercise"
+        )
     return [SubmissionRead.model_validate(submission) for submission in submissions]
 
-@router.post("/{exercise_id}/submit", response_model=ErlangTestResponse, name="exercise:submit_exercise")
+
+@router.post(
+    "/{exercise_id}/submit",
+    response_model=ErlangTestResponse,
+    name="exercise:submit_exercise",
+)
 async def submit_exercise_route(
     exercise_id: int,
     code_snippet: str = Body(..., embed=True),
     user: User = Depends(get_current_user_authorize()),
     db: AsyncSession = Depends(get_db_session),
-    erlang = Depends(get_erlang_service)
+    erlang: ErlangService = Depends(get_erlang_service),
 ) -> ErlangTestResponse:
-    try:
-        sub = SubmissionCreate(code_snippet=code_snippet, user_id=user.id, exercise_id=exercise_id)
-        test_response = await erlang.submit_code_erlang(db, sub)
-        return test_response
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    sub = SubmissionCreate(
+        code_snippet=code_snippet, user_id=user.id, exercise_id=exercise_id
+    )
 
-@router.delete("/submission/{submission_id}",response_model=bool, name="exercise:delete_submission")
+    result = await erlang.submit_code_erlang(db, sub)
+
+    if result.is_fail():
+        if isinstance(result.error, NotFoundError):
+            raise HTTPException(status_code=404, detail=result.error.message)
+        elif isinstance(result.error, ValidationError):
+            raise HTTPException(status_code=400, detail=result.error.message)
+        raise HTTPException(status_code=500, detail=result.error.message)
+
+    return result.data
+
+
+@router.delete(
+    "/submission/{submission_id}",
+    response_model=bool,
+    name="exercise:delete_submission",
+)
 async def delete_submission_route(
-    submission_id: int,
-    db: AsyncSession = Depends(get_db_session)
+    submission_id: int, db: AsyncSession = Depends(get_db_session)
 ):
     return await submission_crud.delete_submission(db, submission_id)
 
-@router.put("/{exercise_id}", response_model=ExerciseRead, name="exercise:update_exercise")
+
+@router.put(
+    "/{exercise_id}", response_model=ExerciseRead, name="exercise:update_exercise"
+)
 async def update_exercise_route(
-    exercise_id : int,
-    update : ExerciseUpdate,
-    db: AsyncSession = Depends(get_db_session)
+    exercise_id: int, update: ExerciseUpdate, db: AsyncSession = Depends(get_db_session)
 ):
     exercise = await exercise_crud.update_exercise(db, exercise_id, update)
     if not exercise:

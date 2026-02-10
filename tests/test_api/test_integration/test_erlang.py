@@ -1,7 +1,7 @@
 import pytest
 from fastapi import FastAPI
 from httpx import AsyncClient
-from tests.utils import mockraise
+from tests.utils import mockServiceRaise
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_422_UNPROCESSABLE_ENTITY, HTTP_500_INTERNAL_SERVER_ERROR
 from app.models.domain.exercise import Exercise
 from app.services.erlang import ErlangService
@@ -32,7 +32,8 @@ async def test_execute_valid_erlang_code(
 
 @pytest.mark.asyncio
 async def test_execute_erlang_code_fail(app: FastAPI, client: AsyncClient, mocker):
-    mocker.patch.object(ErlangService,"compile_erlang_code",mockraise("Test failed"))
+    mocker.patch.object(ErlangService,"compile_erlang_code",mockServiceRaise("Test failed"))
+
     resp = await client.post(
         app.url_path_for("erlang:compile"),
         json={"op" : "", "code" : ""}
@@ -186,7 +187,7 @@ async def test_erlang_test_endpoint_with_exercise(app: FastAPI, client: AsyncCli
 
 @pytest.mark.asyncio
 async def test_erlang_test_endpoint_with_exercise_fail(app: FastAPI, client: AsyncClient, mocker):
-    mocker.patch.object(ErlangService,"_test_code_erlang",mockraise("Test Failed"))
+    mocker.patch.object(ErlangService,"test_code_erlang",mockServiceRaise("Test Failed"))
     resp = await client.post(
         app.url_path_for("erlang:test", exercise_id=1),
         json={"source_code" : ""}

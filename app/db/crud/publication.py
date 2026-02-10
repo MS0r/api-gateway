@@ -38,7 +38,7 @@ async def get_questions_from_user(db: AsyncSession, user_id: int) -> List[Tuple[
     )
     return questions.scalars().all()
 
-async def get_last_questions(db: AsyncSession) -> List[Tuple[Question, int, int, int]]:
+async def get_last_questions(db: AsyncSession, limit : int) -> List[Tuple[Question, int, int, int]]:
     questions = await db.execute(
         select(
             Question,
@@ -50,7 +50,7 @@ async def get_last_questions(db: AsyncSession) -> List[Tuple[Question, int, int,
         .outerjoin(Question.votes)
         .group_by(Question.id)
         .order_by(Question.created_at.desc())
-        .limit(5)
+        .limit(limit)
     )
     return questions.all()
 

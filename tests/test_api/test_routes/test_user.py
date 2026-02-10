@@ -8,6 +8,9 @@ from app.models.domain.course import Course
 from app.models.domain.quiz_pass import QuizPass
 from app.models.domain.submission import Submission
 from app.models.domain.exercise import Exercise
+from app.services.user import UserService
+from app.services.base import NotFoundError
+from tests.utils import mockServiceRaise
 
 @pytest.mark.asyncio
 async def test_get_user_progress(app: FastAPI, client: AsyncClient, token: str, test_course : Course, test_quiz_pass : QuizPass, test_exercise : Exercise):
@@ -80,10 +83,10 @@ async def test_get_user_submissions_unauthorized(app: FastAPI, client: AsyncClie
 async def test_get_course_progress_not_found(app: FastAPI, client: AsyncClient, token: str, mocker):
     headers = {"Authorization": f"Token {token}"}
     # Mock user_service to return None
-    mocker.patch("app.services.user.get_user_progress", return_value=None)
+    mocker.patch.object(UserService,"get_user_progress",mockServiceRaise("Progress", NotFoundError))
     resp = await client.get(app.url_path_for("user:course_progress", course_id=1), headers=headers)
     assert resp.status_code == HTTP_404_NOT_FOUND
-    assert "No progress found for this course" in resp.json()["errors"]
+    assert "Progress not found" in resp.json()["errors"]
 
 @pytest.mark.asyncio
 async def test_get_user_submissions_not_found(app: FastAPI, client: AsyncClient, token: str, mocker):

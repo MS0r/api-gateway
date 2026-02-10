@@ -1,10 +1,15 @@
 import pytest
 from fastapi import FastAPI
 from httpx import AsyncClient
-from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
+from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
+
+from tests.utils import mockServiceRaise
+
 
 from app.models.domain.publication import Question, Answer
 from app.models.domain.vote import Vote
+from app.services.forum import ForumService
+from app.services.base import ConflictError, NotFoundError, ValidationError
 
 @pytest.mark.asyncio
 async def test_create_question(app: FastAPI, client: AsyncClient, token: str):
@@ -115,17 +120,17 @@ async def test_search_questions_empty(app: FastAPI, client: AsyncClient, mocker)
 
 @pytest.mark.asyncio
 async def test_view_question_not_found(app: FastAPI, client: AsyncClient, mocker):
-    mocker.patch("app.services.forum.get_question", side_effect=Exception("Not found"))
+    mocker.patch.object(ForumService,"get_question",mockServiceRaise("Question", cls=NotFoundError))
     resp = await client.get(app.url_path_for("forum:view_question", question_id=9999))
     assert resp.status_code == HTTP_404_NOT_FOUND
     assert "Question not found" in resp.json()["errors"]
 
 @pytest.mark.asyncio
 async def test_get_answers_not_found(app: FastAPI, client: AsyncClient, mocker):
-    mocker.patch("app.services.forum.get_answers_by_question", side_effect=Exception("No answers"))
+    mocker.patch.object(ForumService,"get_question",mockServiceRaise("Question",NotFoundError))
     resp = await client.get(app.url_path_for("forum:get_answers", question_id=9999))
     assert resp.status_code == HTTP_404_NOT_FOUND
-    assert "Answers not found" in resp.json()["errors"]
+    assert "Question not found" in resp.json()["errors"]
 
 @pytest.mark.asyncio
 async def test_vote_question(app: FastAPI, client: AsyncClient, token: str, test_question: Question):
@@ -225,22 +230,22 @@ async def test_vote_answer_switch_vote(app: FastAPI, client: AsyncClient, token:
     assert resp.json()["id"] == answer_upvote.id
 
 @pytest.mark.asyncio
-async def test_vote_question_forbidden(app: FastAPI, client: AsyncClient, token: str, mocker):
+async def test_vote_question_validation(app: FastAPI, client: AsyncClient, token: str, mocker):
     headers = {"Authorization": f"Token {token}"}
-    mocker.patch("app.services.forum.vote_publication", side_effect=Exception("Vote fail"))
+    mocker.patch.object(ForumService,"vote",mockServiceRaise("Vote fail", ValidationError))
     resp = await client.post(app.url_path_for("forum:vote_question", question_id=1),
                              json={"vote": "upvote"}, headers=headers)
-    assert resp.status_code == HTTP_403_FORBIDDEN
-    assert "Question not found" in resp.json()["errors"]
+    assert resp.status_code == HTTP_400_BAD_REQUEST
+    assert "Vote fail" in resp.json()["errors"]
 
 @pytest.mark.asyncio
-async def test_vote_answer_forbidden(app: FastAPI, client: AsyncClient, token: str, mocker):
+async def test_vote_answer_validation(app: FastAPI, client: AsyncClient, token: str, mocker):
     headers = {"Authorization": f"Token {token}"}
-    mocker.patch("app.services.forum.vote_publication", side_effect=Exception("Vote fail"))
+    mocker.patch.object(ForumService,"vote",mockServiceRaise("Vote fail", ValidationError))
     resp = await client.post(app.url_path_for("forum:vote_answer", answer_id=1),
                              json={"vote": "downvote"}, headers=headers)
-    assert resp.status_code == HTTP_403_FORBIDDEN
-    assert "Answer not found" in resp.json()["errors"]
+    assert resp.status_code == HTTP_400_BAD_REQUEST
+    assert "Vote fail" in resp.json()["errors"]
 
 @pytest.mark.asyncio
 async def test_votes_for_question(app : FastAPI, client : AsyncClient, token : str, question_upvote : Vote):
@@ -259,5 +264,5 @@ async def test_votes_for_question_fail(app : FastAPI, client : AsyncClient, toke
     mocker.patch("app.db.crud.publication.get_all_votes_in_question", side_effect=Exception("Fail"))
     resp = await client.get(app.url_path_for("forum:get_votes_for_question", question_id=1),
                             headers=headers)
-    assert resp.status_code == 403
-    assert "Votes not found" in resp.json()["errors"]
+    assert resp.status_code == 500
+    assert any(["Fail" in error for error in resp.json()["errors"]])
