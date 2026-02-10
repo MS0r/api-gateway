@@ -16,8 +16,6 @@ services:
     container_name: test-postgres-api
     restart: unless-stopped
     shm_size: 128mb
-    ports:
-      - "5432:5432"
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: 123
@@ -43,7 +41,6 @@ services:
     container_name: rabbitmq
     hostname: ${RABBITMQ_HOST}
     ports:
-      - "5672:5672"
       - "15672:15672"
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
